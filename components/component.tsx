@@ -1,798 +1,343 @@
 /**
  * v0 by Vercel.
- * @see https://v0.dev/t/bWEOjuXXqgQ
+ * @see https://v0.dev/t/IKoNrpTXmwa
  * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
  */
-import Link from "next/link"
+"use client"
+
+import { useState } from "react"
 import { Input } from "@/components/ui/input"
-import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { SVGProps } from "react"
+import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 
 export default function Component() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isDarkMode, setIsDarkMode] = useState(false)
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+  const [isSignupModalOpen, setIsSignupModalOpen] = useState(false)
+  const [selectedCategories, setSelectedCategories] = useState([])
+  const [categorySearchTerm, setCategorySearchTerm] = useState("")
+  const [artistSearchTerm, setArtistSearchTerm] = useState("")
+  const [selectedArtists, setSelectedArtists] = useState([])
+  const handleCategorySearch = (e) => {
+    setCategorySearchTerm(e.target.value)
+  }
+  const handleCategorySelect = (category) => {
+    setSelectedCategories([...selectedCategories, category])
+    setCategorySearchTerm("")
+  }
+  const handleCategoryRemove = (index) => {
+    const updatedCategories = [...selectedCategories]
+    updatedCategories.splice(index, 1)
+    setSelectedCategories(updatedCategories)
+  }
+  const handleArtistSearch = (e) => {
+    setArtistSearchTerm(e.target.value)
+  }
+  const handleArtistSelect = (artist) => {
+    setSelectedArtists([...selectedArtists, artist])
+    setArtistSearchTerm("")
+  }
+  const handleArtistRemove = (index) => {
+    const updatedArtists = [...selectedArtists]
+    updatedArtists.splice(index, 1)
+    setSelectedArtists(updatedArtists)
+  }
+  const filteredCategories = categorySearchTerm
+    ? ["랩", "댄스", "J-팝", "발라드", "인디", "힙합", "팝", "K-팝"].filter((category) =>
+        category.toLowerCase().includes(categorySearchTerm.toLowerCase()),
+      )
+    : []
+  const filteredArtists = artistSearchTerm
+    ? ["아이유", "빅뱅", "방탄소년단", "뉴진스", "에스파", "검정치마", "김광석", "김필"].filter((artist) =>
+        artist.toLowerCase().includes(artistSearchTerm.toLowerCase()),
+      )
+    : []
   return (
-    <div className="flex flex-col w-full min-h-screen">
-      <header className="flex items-center justify-between h-16 px-4 border-b bg-background shrink-0 md:px-6">
-        <div className="flex items-center gap-4">
-          <Link href="#" className="font-bold text-lg" prefetch={false}>
-            초금비 노래책
-          </Link>
+    <div className={`flex flex-col min-h-screen ${isDarkMode ? "dark" : ""}`}>
+      <header className="fixed top-0 left-0 right-0 z-10 flex items-center justify-between bg-primary text-primary-foreground px-8 py-3 shadow-md">
+        <div className="text-lg font-bold">초금비 MUSIC-BOOK</div>
+        <div className="relative flex-1 max-w-md mx-8">
+          <Input
+            type="search"
+            placeholder="Search music..."
+            className="w-full rounded-full bg-primary-foreground/10 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          />
+          <SearchIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-foreground/50" />
         </div>
-        <div className="relative flex-1 max-w-md">
-          <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input type="search" placeholder="노래제목, 아티스트명을 검색하세요" className="pl-8 w-full" />
-        </div>
-        <div className="flex items-center gap-2">
-          <HoverCard>
-            <HoverCardTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <UserIcon className="w-5 h-5" />
-                <span className="sr-only">로그인/회원가입</span>
-              </Button>
-            </HoverCardTrigger>
-            <HoverCardContent className="w-80">
-              <div className="space-y-4">
-                <h4 className="text-lg font-semibold">어서오세요 초금비 노래책 입니다.</h4>
-                <div className="space-y-2">
-                  <Button className="w-full">
-                    로그인
-                  </Button>
-                  <Button variant="outline" className="w-full">
-                    회원가입
-                  </Button>
-                </div>
-              </div>
-            </HoverCardContent>
-          </HoverCard>
-          <HoverCard>
-            <HoverCardTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <LayoutGridIcon className="w-5 h-5" />
-                <span className="sr-only">카테고리</span>
-              </Button>
-            </HoverCardTrigger>
-            <HoverCardContent className="w-80">
-              <div className="space-y-4">
-                <h4 className="text-lg font-semibold">카테고리</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  <Link
-                    href="#"
-                    className="bg-muted/50 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
-                    prefetch={false}
-                  >
-                    Pop
-                  </Link>
-                  <Link
-                    href="#"
-                    className="bg-muted/50 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
-                    prefetch={false}
-                  >
-                    Rock
-                  </Link>
-                  <Link
-                    href="#"
-                    className="bg-muted/50 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
-                    prefetch={false}
-                  >
-                    Hip Hop
-                  </Link>
-                  <Link
-                    href="#"
-                    className="bg-muted/50 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
-                    prefetch={false}
-                  >
-                    R&B
-                  </Link>
-                  <Link
-                    href="#"
-                    className="bg-muted/50 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
-                    prefetch={false}
-                  >
-                    Country
-                  </Link>
-                  <Link
-                    href="#"
-                    className="bg-muted/50 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
-                    prefetch={false}
-                  >
-                    Electronic
-                  </Link>
-                </div>
-              </div>
-            </HoverCardContent>
-          </HoverCard>
-          <HoverCard>
-            <HoverCardTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <UsersIcon className="w-5 h-5" />
-                <span className="sr-only">아티스트</span>
-              </Button>
-            </HoverCardTrigger>
-            <HoverCardContent className="w-80">
-              <div className="space-y-4">
-                <h4 className="text-lg font-semibold">아티스트</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  <Link
-                    href="#"
-                    className="bg-muted/50 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
-                    prefetch={false}
-                  >
-                    Adele
-                  </Link>
-                  <Link
-                    href="#"
-                    className="bg-muted/50 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
-                    prefetch={false}
-                  >
-                    Ed Sheeran
-                  </Link>
-                  <Link
-                    href="#"
-                    className="bg-muted/50 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
-                    prefetch={false}
-                  >
-                    Taylor Swift
-                  </Link>
-                  <Link
-                    href="#"
-                    className="bg-muted/50 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
-                    prefetch={false}
-                  >
-                    Drake
-                  </Link>
-                  <Link
-                    href="#"
-                    className="bg-muted/50 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
-                    prefetch={false}
-                  >
-                    Beyoncé
-                  </Link>
-                  <Link
-                    href="#"
-                    className="bg-muted/50 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
-                    prefetch={false}
-                  >
-                    Kendrick Lamar
-                  </Link>
-                </div>
-              </div>
-            </HoverCardContent>
-          </HoverCard>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <AlignRightIcon className="w-5 h-5" />
-                <span className="sr-only">Align</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>제목 오름차순</DropdownMenuItem>
-              <DropdownMenuItem>제목 내림차순</DropdownMenuItem>
-              <DropdownMenuItem>아티스트명 오름차순</DropdownMenuItem>
-              <DropdownMenuItem>아티스트명 내림차순</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <MoonIcon className="w-5 h-5" />
-                <span className="sr-only">Theme</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>
-                <div className="flex items-center">
-                  <SunIcon className="w-4 h-4 mr-2" />
-                  라이트 모드
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <div className="flex items-center">
-                  <MoonIcon className="w-4 h-4 mr-2" />
-                  다크 모드
-                </div>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(!isMenuOpen)} className="rounded-full">
+          <MenuIcon className="w-6 h-6" />
+        </Button>
       </header>
-      <main className="flex-1 p-4 md:p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <div className="relative group">
-            <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-              <span className="sr-only">View Song</span>
-            </Link>
-            <img
-              src="https://image.bugsm.co.kr/album/images/original/1755/175550.jpg?version=undefined"
-              alt="Song Cover"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity"
-            />
-            <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent rounded-lg">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-white">Chasing Pavements</h3>
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <span>Adele</span>
-                  <span>·</span>
-                  <span>Pop</span>
-                </div>
+      <div className="container mx-auto px-12 py-20 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        {[...Array(20)].map((_, index) => (
+          <div key={index} className="bg-muted rounded-lg overflow-hidden group cursor-pointer">
+            <div className="relative aspect-square">
+              <img
+                src="https://image.bugsm.co.kr/album/images/original/40885/4088574.jpg?version=undefined"
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+            </div>
+            <div className="p-3">
+              <div className="text-lg font-bold">Super Shy</div>
+              <div className="text-sm text-muted-foreground">
+                New Jeans  | K-POP 
               </div>
             </div>
           </div>
-          <div className="relative group">
-            <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-              <span className="sr-only">View Song</span>
-            </Link>
-            <img
-              src="https://image.bugsm.co.kr/album/images/original/6118/611813.jpg?version=undefined"
-              alt="Song Cover"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity"
-            />
-            <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent rounded-lg">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-white">Shape of You</h3>
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <span>Ed Sheeran</span>
-                  <span>·</span>
-                  <span>Pop</span>
+        ))}
+      </div>
+      <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen} side="right" className="bg-background text-foreground">
+        <SheetContent>
+          <div className="flex flex-col items-start gap-6 p-8">
+            <div className="flex items-center gap-4">
+              <Button variant="outline" onClick={() => setIsLoginModalOpen(true)}>
+                Login
+              </Button>
+              <Button variant="outline" onClick={() => setIsSignupModalOpen(true)}>
+                Signup
+              </Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="category">Category</Label>
+            </div>
+            <div className="w-full">
+              <Input
+                id="category"
+                type="text"
+                placeholder="Search category"
+                value={categorySearchTerm}
+                onChange={handleCategorySearch}
+                className="w-full rounded-full bg-muted px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
+              {categorySearchTerm && (
+                <div className="mt-2 space-y-2">
+                  {filteredCategories.map((category) => (
+                    <div
+                      key={category}
+                      className="bg-muted rounded-full px-4 py-2 flex items-center justify-between cursor-pointer"
+                      onClick={() => handleCategorySelect(category)}
+                    >
+                      <span>{category}</span>
+                      <PlusIcon className="w-4 h-4" />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            {selectedCategories.length > 0 && (
+              <div className="w-full">
+                <div className="flex flex-wrap gap-2">
+                  {selectedCategories.map((category, index) => (
+                    <div
+                      key={index}
+                      className="bg-muted rounded-full px-4 py-2 flex items-center justify-between cursor-pointer"
+                      onClick={() => handleCategoryRemove(index)}
+                    >
+                      <span>{category}</span>
+                      <XIcon className="w-4 h-4" />
+                    </div>
+                  ))}
                 </div>
               </div>
+            )}
+            <div className="flex items-center gap-2">
+              <Label htmlFor="artist">Artist</Label>
             </div>
-          </div>
-          <div className="relative group">
-            <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-              <span className="sr-only">View Song</span>
-            </Link>
-            <img
-              src="https://image.bugsm.co.kr/album/images/original/4596/459688.jpg?version=undefined"
-              alt="Song Cover"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity"
-            />
-            <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent rounded-lg">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-white">Blank Space</h3>
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <span>Taylor Swift</span>
-                  <span>·</span>
-                  <span>Pop</span>
+            <div className="w-full">
+              <Input
+                id="artist"
+                type="text"
+                placeholder="Search artist"
+                value={artistSearchTerm}
+                onChange={handleArtistSearch}
+                className="w-full rounded-full bg-muted px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
+              {artistSearchTerm && (
+                <div className="mt-2 space-y-2">
+                  {filteredArtists.map((artist) => (
+                    <div
+                      key={artist}
+                      className="bg-muted rounded-full px-4 py-2 flex items-center justify-between cursor-pointer"
+                      onClick={() => handleArtistSelect(artist)}
+                    >
+                      <span>{artist}</span>
+                      <PlusIcon className="w-4 h-4" />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            {selectedArtists.length > 0 && (
+              <div className="w-full">
+                <div className="flex flex-wrap gap-2">
+                  {selectedArtists.map((artist, index) => (
+                    <div
+                      key={index}
+                      className="bg-muted rounded-full px-4 py-2 flex items-center justify-between cursor-pointer"
+                      onClick={() => handleArtistRemove(index)}
+                    >
+                      <span>{artist}</span>
+                      <XIcon className="w-4 h-4" />
+                    </div>
+                  ))}
                 </div>
               </div>
+            )}
+            <div className="flex items-center gap-2">
+              <Label htmlFor="dark-mode">Dark Mode</Label>
+              <Switch
+                id="dark-mode"
+                checked={isDarkMode}
+                onCheckedChange={setIsDarkMode}
+                className="relative inline-flex h-[22px] w-[42px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
+              >
+                <span className="sr-only">Dark Mode</span>
+                <span
+                  aria-hidden="true"
+                  className={`pointer-events-none inline-block h-[18px] w-[18px] transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                    isDarkMode ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </Switch>
             </div>
           </div>
-          <div className="relative group">
-            <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-              <span className="sr-only">View Song</span>
-            </Link>
-            <img
-              src="https://image.bugsm.co.kr/album/images/original/7307/730712.jpg?version=undefined"
-              alt="Song Cover"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity"
-            />
-            <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent rounded-lg">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-white">God's Plan</h3>
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <span>Drake</span>
-                  <span>·</span>
-                  <span>Hip Hop</span>
-                </div>
-              </div>
+        </SheetContent>
+      </Sheet>
+      <Dialog open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen}>
+        <DialogContent className="bg-background text-foreground p-8 rounded-lg shadow-lg max-w-md w-full">
+          <DialogHeader>
+            <DialogTitle>Login</DialogTitle>
+            <DialogDescription>Enter your credentials to access your account.</DialogDescription>
+          </DialogHeader>
+          <form className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" placeholder="example@email.com" />
             </div>
-          </div>
-          <div className="relative group">
-            <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-              <span className="sr-only">View Song</span>
-            </Link>
-            <img
-              src="https://image.bugsm.co.kr/album/images/original/40885/4088574.jpg?version=undefined"
-              alt="Song Cover"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity"
-            />
-            <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent rounded-lg">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-white">Super Shy</h3>
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <span>NewJeans</span>
-                  <span>·</span>
-                  <span>dance/pop</span>
-                </div>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input id="password" type="password" placeholder="********" />
             </div>
-          </div>
-          <div className="relative group">
-            <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-              <span className="sr-only">View Song</span>
-            </Link>
-            <img
-              src="https://image.bugsm.co.kr/album/images/original/200402/20040257.jpg?version=undefined"
-              alt="Song Cover"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity"
-            />
-            <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent rounded-lg">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-white">기다린 만큼, 더</h3>
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <span>검정치마</span>
-                  <span>·</span>
-                  <span>indie/pop</span>
-                </div>
-              </div>
+            <Button type="submit" className="w-full">
+              Login
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={isSignupModalOpen} onOpenChange={setIsSignupModalOpen}>
+        <DialogContent className="bg-background text-foreground p-8 rounded-lg shadow-lg max-w-md w-full">
+          <DialogHeader>
+            <DialogTitle>Signup</DialogTitle>
+            <DialogDescription>Create a new account to access the music book.</DialogDescription>
+          </DialogHeader>
+          <form className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input id="name" type="text" placeholder="John Doe" />
             </div>
-          </div>
-          <div className="relative group">
-            <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-              <span className="sr-only">View Song</span>
-            </Link>
-            <img
-              src="https://image.bugsm.co.kr/album/images/original/1755/175550.jpg?version=undefined"
-              alt="Song Cover"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity"
-            />
-            <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent rounded-lg">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-white">Chasing Pavements</h3>
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <span>Adele</span>
-                  <span>·</span>
-                  <span>Pop</span>
-                </div>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" placeholder="example@email.com" />
             </div>
-          </div>
-          <div className="relative group">
-            <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-              <span className="sr-only">View Song</span>
-            </Link>
-            <img
-              src="https://image.bugsm.co.kr/album/images/original/6118/611813.jpg?version=undefined"
-              alt="Song Cover"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity"
-            />
-            <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent rounded-lg">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-white">Shape of You</h3>
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <span>Ed Sheeran</span>
-                  <span>·</span>
-                  <span>Pop</span>
-                </div>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input id="password" type="password" placeholder="********" />
             </div>
-          </div>
-          <div className="relative group">
-            <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-              <span className="sr-only">View Song</span>
-            </Link>
-            <img
-              src="https://image.bugsm.co.kr/album/images/original/4596/459688.jpg?version=undefined"
-              alt="Song Cover"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity"
-            />
-            <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent rounded-lg">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-white">Blank Space</h3>
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <span>Taylor Swift</span>
-                  <span>·</span>
-                  <span>Pop</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="relative group">
-            <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-              <span className="sr-only">View Song</span>
-            </Link>
-            <img
-              src="https://image.bugsm.co.kr/album/images/original/7307/730712.jpg?version=undefined"
-              alt="Song Cover"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity"
-            />
-            <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent rounded-lg">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-white">God's Plan</h3>
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <span>Drake</span>
-                  <span>·</span>
-                  <span>Hip Hop</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="relative group">
-            <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-              <span className="sr-only">View Song</span>
-            </Link>
-            <img
-              src="https://image.bugsm.co.kr/album/images/original/40885/4088574.jpg?version=undefined"
-              alt="Song Cover"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity"
-            />
-            <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent rounded-lg">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-white">Super Shy</h3>
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <span>NewJeans</span>
-                  <span>·</span>
-                  <span>dance/pop</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="relative group">
-            <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-              <span className="sr-only">View Song</span>
-            </Link>
-            <img
-              src="https://image.bugsm.co.kr/album/images/original/200402/20040257.jpg?version=undefined"
-              alt="Song Cover"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity"
-            />
-            <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent rounded-lg">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-white">기다린 만큼, 더</h3>
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <span>검정치마</span>
-                  <span>·</span>
-                  <span>indie/pop</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="relative group">
-            <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-              <span className="sr-only">View Song</span>
-            </Link>
-            <img
-              src="https://image.bugsm.co.kr/album/images/original/1755/175550.jpg?version=undefined"
-              alt="Song Cover"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity"
-            />
-            <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent rounded-lg">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-white">Chasing Pavements</h3>
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <span>Adele</span>
-                  <span>·</span>
-                  <span>Pop</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="relative group">
-            <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-              <span className="sr-only">View Song</span>
-            </Link>
-            <img
-              src="https://image.bugsm.co.kr/album/images/original/6118/611813.jpg?version=undefined"
-              alt="Song Cover"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity"
-            />
-            <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent rounded-lg">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-white">Shape of You</h3>
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <span>Ed Sheeran</span>
-                  <span>·</span>
-                  <span>Pop</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="relative group">
-            <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-              <span className="sr-only">View Song</span>
-            </Link>
-            <img
-              src="https://image.bugsm.co.kr/album/images/original/4596/459688.jpg?version=undefined"
-              alt="Song Cover"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity"
-            />
-            <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent rounded-lg">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-white">Blank Space</h3>
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <span>Taylor Swift</span>
-                  <span>·</span>
-                  <span>Pop</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="relative group">
-            <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-              <span className="sr-only">View Song</span>
-            </Link>
-            <img
-              src="https://image.bugsm.co.kr/album/images/original/7307/730712.jpg?version=undefined"
-              alt="Song Cover"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity"
-            />
-            <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent rounded-lg">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-white">God's Plan</h3>
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <span>Drake</span>
-                  <span>·</span>
-                  <span>Hip Hop</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="relative group">
-            <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-              <span className="sr-only">View Song</span>
-            </Link>
-            <img
-              src="https://image.bugsm.co.kr/album/images/original/40885/4088574.jpg?version=undefined"
-              alt="Song Cover"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity"
-            />
-            <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent rounded-lg">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-white">Super Shy</h3>
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <span>NewJeans</span>
-                  <span>·</span>
-                  <span>dance/pop</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="relative group">
-            <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-              <span className="sr-only">View Song</span>
-            </Link>
-            <img
-              src="https://image.bugsm.co.kr/album/images/original/200402/20040257.jpg?version=undefined"
-              alt="Song Cover"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity"
-            />
-            <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent rounded-lg">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-white">기다린 만큼, 더</h3>
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <span>검정치마</span>
-                  <span>·</span>
-                  <span>indie/pop</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="relative group">
-            <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-              <span className="sr-only">View Song</span>
-            </Link>
-            <img
-              src="https://image.bugsm.co.kr/album/images/original/1755/175550.jpg?version=undefined"
-              alt="Song Cover"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity"
-            />
-            <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent rounded-lg">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-white">Chasing Pavements</h3>
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <span>Adele</span>
-                  <span>·</span>
-                  <span>Pop</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="relative group">
-            <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-              <span className="sr-only">View Song</span>
-            </Link>
-            <img
-              src="https://image.bugsm.co.kr/album/images/original/6118/611813.jpg?version=undefined"
-              alt="Song Cover"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity"
-            />
-            <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent rounded-lg">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-white">Shape of You</h3>
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <span>Ed Sheeran</span>
-                  <span>·</span>
-                  <span>Pop</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="relative group">
-            <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-              <span className="sr-only">View Song</span>
-            </Link>
-            <img
-              src="https://image.bugsm.co.kr/album/images/original/4596/459688.jpg?version=undefined"
-              alt="Song Cover"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity"
-            />
-            <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent rounded-lg">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-white">Blank Space</h3>
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <span>Taylor Swift</span>
-                  <span>·</span>
-                  <span>Pop</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="relative group">
-            <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-              <span className="sr-only">View Song</span>
-            </Link>
-            <img
-              src="https://image.bugsm.co.kr/album/images/original/7307/730712.jpg?version=undefined"
-              alt="Song Cover"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity"
-            />
-            <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent rounded-lg">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-white">God's Plan</h3>
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <span>Drake</span>
-                  <span>·</span>
-                  <span>Hip Hop</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="relative group">
-            <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-              <span className="sr-only">View Song</span>
-            </Link>
-            <img
-              src="https://image.bugsm.co.kr/album/images/original/40885/4088574.jpg?version=undefined"
-              alt="Song Cover"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity"
-            />
-            <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent rounded-lg">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-white">Super Shy</h3>
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <span>NewJeans</span>
-                  <span>·</span>
-                  <span>dance/pop</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="relative group">
-            <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-              <span className="sr-only">View Song</span>
-            </Link>
-            <img
-              src="https://image.bugsm.co.kr/album/images/original/200402/20040257.jpg?version=undefined"
-              alt="Song Cover"
-              width={200}
-              height={200}
-              className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity"
-            />
-            <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 to-transparent rounded-lg">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold text-white">기다린 만큼, 더</h3>
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <span>검정치마</span>
-                  <span>·</span>
-                  <span>indie/pop</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
+            <Button type="submit" className="w-full">
+              Signup
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
 
-const SearchIcon = (props: SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 20 20" fill="currentColor" {...props}>
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M8.5 13.5a5 5 0 100-10 5 5 0 000 10zm3.284-1.784a7 7 0 111.414-1.414l3.25 3.25a1 1 0 01-1.414 1.414l-3.25-3.25z"
-    />
-  </svg>
-)
+function MenuIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="4" x2="20" y1="12" y2="12" />
+      <line x1="4" x2="20" y1="6" y2="6" />
+      <line x1="4" x2="20" y1="18" y2="18" />
+    </svg>
+  )
+}
 
-const UserIcon = (props: SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
-    <circle cx="12" cy="7" r="5" />
-    <path d="M12 14c-4.418 0-8 2.239-8 5v3h16v-3c0-2.761-3.582-5-8-5z" />
-  </svg>
-)
 
-const LayoutGridIcon = (props: SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
-    <path d="M3 3h7v7H3z" />
-    <path d="M14 3h7v7h-7z" />
-    <path d="M14 14h7v7h-7z" />
-    <path d="M3 14h7v7H3z" />
-  </svg>
-)
+function PlusIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 12h14" />
+      <path d="M12 5v14" />
+    </svg>
+  )
+}
 
-const UsersIcon = (props: SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
-    <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-    <circle cx="8.5" cy="7" r="4" />
-    <path d="M20 21v-2a4 4 0 00-3-3.87" />
-    <path d="M20 8a4 4 0 11-8 0" />
-  </svg>
-)
 
-const AlignRightIcon = (props: SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
-    <path d="M21 10H7" />
-    <path d="M21 6H3" />
-    <path d="M21 14H3" />
-    <path d="M21 18H7" />
-  </svg>
-)
+function SearchIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.3-4.3" />
+    </svg>
+  )
+}
 
-const MoonIcon = (props: SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
-    <path d="M21.05 12.31A9 9 0 1111.69 2.95 7 7 0 0021.05 12.31z" />
-  </svg>
-)
 
-const SunIcon = (props: SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
-    <circle cx="12" cy="12" r="5" />
-    <path d="M12 1v2" />
-    <path d="M12 21v2" />
-    <path d="M4.22 4.22l1.42 1.42" />
-    <path d="M18.36 18.36l1.42 1.42" />
-    <path d="M1 12h2" />
-    <path d="M21 12h2" />
-    <path d="M4.22 19.78l1.42-1.42" />
-    <path d="M18.36 5.64l1.42-1.42" />
-  </svg>
-)
+function XIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </svg>
+  )
+}
