@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, ChangeEvent } from "react";
+import { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -16,19 +16,28 @@ interface MusicData {
   category: { categoryName: string };
 }
 
-
 export default function Component() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
+  const [isAddMusicModalOpen, setIsAddMusicModalOpen] = useState(false);
+  const [isAddArtistModalOpen, setIsAddArtistModalOpen] = useState(false);
+  const [isAddCategoryModalOpen, setIsAddCategoryModalOpen] = useState(false);
+  const [isSearchMusicModalOpen, setIsSearchMusicModalOpen] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [categorySearchTerm, setCategorySearchTerm] = useState("");
   const [artistSearchTerm, setArtistSearchTerm] = useState("");
   const [selectedArtists, setSelectedArtists] = useState<string[]>([]);
   const [musicData, setMusicData] = useState<MusicData[]>([]);
+  const [musicName, setMusicName] = useState("");
+  const [artistName, setArtistName] = useState("");
+  const [categoryName, setCategoryName] = useState("");
+  const [newArtistName, setNewArtistName] = useState("");
+  const [newArtistSubName, setNewArtistSubName] = useState("");
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryColor, setNewCategoryColor] = useState("");
 
-  
   // 전체 음악 조회 API
   useEffect(() => {
     const fetchMusicData = async () => {
@@ -47,7 +56,6 @@ export default function Component() {
     };
     fetchMusicData();
   }, []);
-
 
   const handleCategorySearch = (e: ChangeEvent<HTMLInputElement>) => {
     setCategorySearchTerm(e.target.value);
@@ -79,6 +87,26 @@ export default function Component() {
     setSelectedArtists(updatedArtists);
   };
 
+  const handleAddMusic = (e: FormEvent) => {
+    e.preventDefault();
+    // 음악 추가 로직 구현
+  };
+
+  const handleSeachAlbumArt = (e: FormEvent) => {
+    e.preventDefault();
+    // 앨범 아트 검색 로직 구현
+  }
+
+  const handleAddArtist = (e: FormEvent) => {
+    e.preventDefault();
+    // 아티스트 추가 로직 구현
+  };
+
+  const handleAddCategory = (e: FormEvent) => {
+    e.preventDefault();
+    // 카테고리 추가 로직 구현
+  };
+
   const filteredCategories = categorySearchTerm
     ? ["랩", "댄스", "J-팝", "발라드", "인디", "힙합", "팝", "K-팝"].filter((category) =>
         category.toLowerCase().includes(categorySearchTerm.toLowerCase())
@@ -108,7 +136,7 @@ export default function Component() {
         </Button>
       </header>
       <div className="container mx-auto px-12 py-20 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-      {musicData.map((music) => (
+        {musicData.map((music) => (
           <div key={music.id} className="bg-muted rounded-lg overflow-hidden group cursor-pointer">
             <div className="relative aspect-square">
               <img
@@ -229,64 +257,207 @@ export default function Component() {
               <Switch
                 id="dark-mode"
                 checked={isDarkMode}
-                onCheckedChange={setIsDarkMode}
-                className="relative inline-flex h-[22px] w-[42px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
-              >
-                <span className="sr-only">Dark Mode</span>
-                <span
-                  aria-hidden="true"
-                  className={`pointer-events-none inline-block h-[18px] w-[18px] transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                    isDarkMode ? "translate-x-5" : "translate-x-0"
-                  }`}
-                />
-              </Switch>
+                onCheckedChange={(checked) => setIsDarkMode(checked)}
+              />
             </div>
+            <Button onClick={() => setIsAddMusicModalOpen(true)}>음악 추가</Button>
+            <Button onClick={() => setIsAddArtistModalOpen(true)}>아티스트 추가</Button>
+            <Button onClick={() => setIsAddCategoryModalOpen(true)}>카테고리 추가</Button>
           </div>
         </SheetContent>
       </Sheet>
+      
+      {/* 로그인 모달 */}
       <Dialog open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen}>
-        <DialogContent className="bg-background text-foreground p-8 rounded-lg shadow-lg max-w-md w-full">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Login</DialogTitle>
-            <DialogDescription>Enter your credentials to access your account.</DialogDescription>
           </DialogHeader>
-          <form className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="example@email.com" />
+          <div>
+            <Label htmlFor="login-email">Email</Label>
+            <Input id="login-email" type="email" className="w-full" />
+          </div>
+          <div>
+            <Label htmlFor="login-password">Password</Label>
+            <Input id="login-password" type="password" className="w-full" />
+          </div>
+          <div className="flex justify-end mt-4">
+            <Button onClick={() => setIsLoginModalOpen(false)}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 회원가입 모달 */}
+      <Dialog open={isSignupModalOpen} onOpenChange={setIsSignupModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Signup</DialogTitle>
+          </DialogHeader>
+          <div>
+            <Label htmlFor="signup-email">Email</Label>
+            <Input id="signup-email" type="email" className="w-full" />
+          </div>
+          <div>
+            <Label htmlFor="signup-password">Password</Label>
+            <Input id="signup-password" type="password" className="w-full" />
+          </div>
+          <div>
+            <Label htmlFor="signup-confirm-password">Confirm Password</Label>
+            <Input id="signup-confirm-password" type="password" className="w-full" />
+          </div>
+          <div className="flex justify-end mt-4">
+            <Button onClick={() => setIsSignupModalOpen(false)}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 음악 추가 모달 */}
+      <Dialog open={isAddMusicModalOpen} onOpenChange={setIsAddMusicModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>음악 추가</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAddMusic}>
+            <div>
+              <Label htmlFor="music-name">음악 이름</Label>
+              <Input
+                id="music-name"
+                type="text"
+                value={musicName}
+                onChange={(e) => setMusicName(e.target.value)}
+                className="w-full"
+              />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" placeholder="********" />
+            <div>
+              <Label htmlFor="music-artist">아티스트</Label>
+              <Input
+                id="music-artist"
+                type="text"
+                value={artistName}
+                onChange={(e) => setArtistName(e.target.value)}
+                className="w-full"
+              />
             </div>
-            <Button type="submit" className="w-full">
-              Login
-            </Button>
+            <div>
+              <Label htmlFor="music-category">카테고리</Label>
+              <Input
+                id="music-category"
+                type="text"
+                value={categoryName}
+                onChange={(e) => setCategoryName(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            <div>
+              <Label htmlFor="search-album-art">앨범아트검색</Label>
+              <Button 
+                onClick={() => setIsSearchMusicModalOpen(true)}
+                className="w-full"
+              >앨범 아트 검색</Button>
+              </div>
+            <div className="flex justify-end mt-4">
+              <Button type="submit">추가</Button>
+            </div>
           </form>
         </DialogContent>
       </Dialog>
-      <Dialog open={isSignupModalOpen} onOpenChange={setIsSignupModalOpen}>
-        <DialogContent className="bg-background text-foreground p-8 rounded-lg shadow-lg max-w-md w-full">
+
+      {/* 음악검색모달 */}
+      <Dialog open={isSearchMusicModalOpen} onOpenChange={setIsSearchMusicModalOpen}>
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>Signup</DialogTitle>
-            <DialogDescription>Create a new account to access the music book.</DialogDescription>
-          </DialogHeader>
-          <form className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" type="text" placeholder="John Doe" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="example@email.com" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" placeholder="********" />
-            </div>
-            <Button type="submit" className="w-full">
-              Signup
+            <DialogTitle>Search Album Art</DialogTitle>
+            <Button variant="ghost" onClick={() => setIsSearchMusicModalOpen(false)} aria-label="Close">
+              <XIcon className="w-6 h-6" />
             </Button>
+          </DialogHeader>
+          <form className="flex flex-col gap-4">
+            <Input type="text" placeholder="Search album art..." />
+            {/* 앨범 아트 검색 구현 */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="relative aspect-square bg-background rounded-lg overflow-hidden cursor-pointer">
+                <img
+                  src="https://via.placeholder.com/300"
+                  alt="Album Art"
+                  className="object-cover w-full h-full"
+                />
+              </div>
+              {/* 여기에 다른 검색 결과 이미지 추가 */}
+            </div>
+            <div className="flex justify-end gap-4">
+              <Button>Search</Button>
+              <Button variant="ghost" onClick={() => setIsSearchMusicModalOpen(false)}>
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* 아티스트 추가 모달 */}
+      <Dialog open={isAddArtistModalOpen} onOpenChange={setIsAddArtistModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>아티스트 추가</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAddArtist}>
+            <div>
+              <Label htmlFor="artist-name">아티스트 이름</Label>
+              <Input
+                id="artist-name"
+                type="text"
+                value={newArtistName}
+                onChange={(e) => setNewArtistName(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            <div>
+              <Label htmlFor="artist-subname">아티스트 별명</Label>
+              <Input
+                id="artist-subname"
+                type="text"
+                value={newArtistSubName}
+                onChange={(e) => setNewArtistSubName(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            <div className="flex justify-end mt-4">
+              <Button type="submit">추가</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* 카테고리 추가 모달 */}
+      <Dialog open={isAddCategoryModalOpen} onOpenChange={setIsAddCategoryModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>카테고리 추가</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAddCategory}>
+            <div>
+              <Label htmlFor="category-name">카테고리 이름</Label>
+              <Input
+                id="category-name"
+                type="text"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            <div>
+              <Label htmlFor="category-color">카테고리 색상</Label>
+              <Input
+                id="category-color"
+                type="text"
+                value={newCategoryColor}
+                onChange={(e) => setNewCategoryColor(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            <div className="flex justify-end mt-4">
+              <Button type="submit">추가</Button>
+            </div>
           </form>
         </DialogContent>
       </Dialog>
@@ -374,3 +545,4 @@ function XIcon(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
