@@ -1,61 +1,96 @@
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/IKoNrpTXmwa
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent } from "@/components/ui/sheet"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { useEffect, useState, ChangeEvent } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+
+interface MusicData {
+  id: string;
+  albumCover: string;
+  musicName: string;
+  author: { authorName: string };
+  category: { categoryName: string };
+}
+
 
 export default function Component() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isDarkMode, setIsDarkMode] = useState(false)
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
-  const [isSignupModalOpen, setIsSignupModalOpen] = useState(false)
-  const [selectedCategories, setSelectedCategories] = useState([])
-  const [categorySearchTerm, setCategorySearchTerm] = useState("")
-  const [artistSearchTerm, setArtistSearchTerm] = useState("")
-  const [selectedArtists, setSelectedArtists] = useState([])
-  const handleCategorySearch = (e) => {
-    setCategorySearchTerm(e.target.value)
-  }
-  const handleCategorySelect = (category) => {
-    setSelectedCategories([...selectedCategories, category])
-    setCategorySearchTerm("")
-  }
-  const handleCategoryRemove = (index) => {
-    const updatedCategories = [...selectedCategories]
-    updatedCategories.splice(index, 1)
-    setSelectedCategories(updatedCategories)
-  }
-  const handleArtistSearch = (e) => {
-    setArtistSearchTerm(e.target.value)
-  }
-  const handleArtistSelect = (artist) => {
-    setSelectedArtists([...selectedArtists, artist])
-    setArtistSearchTerm("")
-  }
-  const handleArtistRemove = (index) => {
-    const updatedArtists = [...selectedArtists]
-    updatedArtists.splice(index, 1)
-    setSelectedArtists(updatedArtists)
-  }
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [categorySearchTerm, setCategorySearchTerm] = useState("");
+  const [artistSearchTerm, setArtistSearchTerm] = useState("");
+  const [selectedArtists, setSelectedArtists] = useState<string[]>([]);
+  const [musicData, setMusicData] = useState<MusicData[]>([]);
+
+  
+  // 전체 음악 조회 API
+  useEffect(() => {
+    const fetchMusicData = async () => {
+      try {
+        const response = await fetch("https://www.chogeumbi.kr/api/v1/music/all");
+        const result = await response.json();
+        console.log("Fetched music data:", result); // 추가된 로그
+        if (result.data && result.data.musicList) {
+          setMusicData(result.data.musicList);
+        } else {
+          console.error("Unexpected response structure:", result);
+        }
+      } catch (error) {
+        console.error("Failed to fetch music data:", error);
+      }
+    };
+    fetchMusicData();
+  }, []);
+
+
+  const handleCategorySearch = (e: ChangeEvent<HTMLInputElement>) => {
+    setCategorySearchTerm(e.target.value);
+  };
+
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategories([...selectedCategories, category]);
+    setCategorySearchTerm("");
+  };
+
+  const handleCategoryRemove = (index: number) => {
+    const updatedCategories = [...selectedCategories];
+    updatedCategories.splice(index, 1);
+    setSelectedCategories(updatedCategories);
+  };
+
+  const handleArtistSearch = (e: ChangeEvent<HTMLInputElement>) => {
+    setArtistSearchTerm(e.target.value);
+  };
+
+  const handleArtistSelect = (artist: string) => {
+    setSelectedArtists([...selectedArtists, artist]);
+    setArtistSearchTerm("");
+  };
+
+  const handleArtistRemove = (index: number) => {
+    const updatedArtists = [...selectedArtists];
+    updatedArtists.splice(index, 1);
+    setSelectedArtists(updatedArtists);
+  };
+
   const filteredCategories = categorySearchTerm
     ? ["랩", "댄스", "J-팝", "발라드", "인디", "힙합", "팝", "K-팝"].filter((category) =>
-        category.toLowerCase().includes(categorySearchTerm.toLowerCase()),
+        category.toLowerCase().includes(categorySearchTerm.toLowerCase())
       )
-    : []
+    : [];
+
   const filteredArtists = artistSearchTerm
     ? ["아이유", "빅뱅", "방탄소년단", "뉴진스", "에스파", "검정치마", "김광석", "김필"].filter((artist) =>
-        artist.toLowerCase().includes(artistSearchTerm.toLowerCase()),
+        artist.toLowerCase().includes(artistSearchTerm.toLowerCase())
       )
-    : []
+    : [];
+
   return (
     <div className={`flex flex-col min-h-screen ${isDarkMode ? "dark" : ""}`}>
       <header className="fixed top-0 left-0 right-0 z-10 flex items-center justify-between bg-primary text-primary-foreground px-8 py-3 shadow-md">
@@ -73,19 +108,20 @@ export default function Component() {
         </Button>
       </header>
       <div className="container mx-auto px-12 py-20 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-        {[...Array(20)].map((_, index) => (
-          <div key={index} className="bg-muted rounded-lg overflow-hidden group cursor-pointer">
+      {musicData.map((music) => (
+          <div key={music.id} className="bg-muted rounded-lg overflow-hidden group cursor-pointer">
             <div className="relative aspect-square">
               <img
-                src="https://image.bugsm.co.kr/album/images/original/40885/4088574.jpg?version=undefined"
+                src={music.albumCover}
+                alt={music.musicName}
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
             </div>
             <div className="p-3">
-              <div className="text-lg font-bold">Super Shy</div>
+              <div className="text-lg font-bold">{music.musicName}</div>
               <div className="text-sm text-muted-foreground">
-                New Jeans  | K-POP 
+                {music.author.authorName} | {music.category.categoryName}
               </div>
             </div>
           </div>
@@ -255,10 +291,10 @@ export default function Component() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
 
-function MenuIcon(props) {
+function MenuIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -276,11 +312,10 @@ function MenuIcon(props) {
       <line x1="4" x2="20" y1="6" y2="6" />
       <line x1="4" x2="20" y1="18" y2="18" />
     </svg>
-  )
+  );
 }
 
-
-function PlusIcon(props) {
+function PlusIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -297,11 +332,10 @@ function PlusIcon(props) {
       <path d="M5 12h14" />
       <path d="M12 5v14" />
     </svg>
-  )
+  );
 }
 
-
-function SearchIcon(props) {
+function SearchIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -318,11 +352,10 @@ function SearchIcon(props) {
       <circle cx="11" cy="11" r="8" />
       <path d="m21 21-4.3-4.3" />
     </svg>
-  )
+  );
 }
 
-
-function XIcon(props) {
+function XIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -339,5 +372,5 @@ function XIcon(props) {
       <path d="M18 6 6 18" />
       <path d="m6 6 12 12" />
     </svg>
-  )
+  );
 }
