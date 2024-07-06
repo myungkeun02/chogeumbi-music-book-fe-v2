@@ -4,7 +4,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
+import { FeedbackModal } from './FeedbackModal';
 
 interface SignupModalProps {
   isOpen: boolean;
@@ -16,18 +17,35 @@ export default function SignupModal({ isOpen, onOpenChange }: SignupModalProps) 
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
-  const [error, setError] = useState<string>('');
   const [emailError, setEmailError] = useState<string>('');
   const [usernameError, setUsernameError] = useState<string>('');
   const [isWelcomeOpen, setIsWelcomeOpen] = useState<boolean>(false);
   const [isEmailVerificationOpen, setIsEmailVerificationOpen] = useState<boolean>(true);
   const [authCode, setAuthCode] = useState<string>('');
   const [isCodeSent, setIsCodeSent] = useState<boolean>(false);
-  const [verificationError, setVerificationError] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isCodeLoading, setIsCodeLoading] = useState<boolean>(false);
-  const [timeLeft, setTimeLeft] = useState<number>(300); // 5 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState<number>(300);
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [feedbackTitle, setFeedbackTitle] = useState('');
+  const [feedbackMessage, setFeedbackMessage] = useState('');
   const router = useRouter();
+
+  const resetState = () => {
+    setEmail('');
+    setUsername('');
+    setPassword('');
+    setConfirmPassword('');
+    setEmailError('');
+    setUsernameError('');
+    setIsWelcomeOpen(false);
+    setIsEmailVerificationOpen(true);
+    setAuthCode('');
+    setIsCodeSent(false);
+    setIsLoading(false);
+    setIsCodeLoading(false);
+    setTimeLeft(300);
+  };
 
   const validateEmail = (email: string): boolean => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -43,10 +61,10 @@ export default function SignupModal({ isOpen, onOpenChange }: SignupModalProps) 
     const username = e.target.value;
     setUsername(username);
     if(!validateUsername(username)) {
-        setUsernameError('닉네임은 한글, 영어(대소문자), 숫자와 _ 만 사용 가능합니다.')
+      setUsernameError('닉네임은 한글, 영어(대소문자), 숫자와 _ 만 사용 가능합니다.')
     } else {
-        setUsernameError('');
-      }
+      setUsernameError('');
+    }
   }
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,7 +80,7 @@ export default function SignupModal({ isOpen, onOpenChange }: SignupModalProps) 
   const handleSendCode = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if (!email) {
-      setEmailError("이메일을 입력하세요.");
+      showFeedback('오류', '이메일을 입력하세요.');
       return;
     }
 
@@ -71,11 +89,11 @@ export default function SignupModal({ isOpen, onOpenChange }: SignupModalProps) 
       const response = await axios.post('https://www.chogeumbi.kr/api/v1/auth/signup/mail-send', { email });
       if (response.status === 200) {
         setIsCodeSent(true);
-        setTimeLeft(300); // Reset the timer
-        alert('인증 코드가 이메일로 발송되었습니다.');
+        setTimeLeft(300);
+        showFeedback('성공', '인증 코드가 이메일로 발송되었습니다.');
       }
     } catch (error) {
-      setEmailError('이메일 발송에 실패했습니다. 다시 시도해주세요.');
+      showFeedback('오류', '이메일 발송에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsCodeLoading(false);
     }
@@ -91,13 +109,12 @@ export default function SignupModal({ isOpen, onOpenChange }: SignupModalProps) 
       });
 
       if (response.status === 200) {
-        alert('이메일 인증 성공!');
+        showFeedback('성공', '이메일 인증 성공!');
         setIsEmailVerificationOpen(false);
-        setIsCodeSent(false);  // 인증 코드 입력 필드를 숨기기 위해 추가
+        setIsCodeSent(false);
       }
     } catch (error) {
-      setVerificationError('인증 코드가 유효하지 않습니다. 다시 시도해주세요.');
-      console.log(error)
+      showFeedback('오류', '인증 코드가 유효하지 않습니다. 다시 시도해주세요.');
     } finally {
       setIsCodeLoading(false);
     }
@@ -105,17 +122,17 @@ export default function SignupModal({ isOpen, onOpenChange }: SignupModalProps) 
 
   const handleSignup = async () => {
     if (!validateEmail(email)) {
-      setEmailError('올바른 이메일 형식이 아닙니다.');
+      showFeedback('오류', '올바른 이메일 형식이 아닙니다.');
       return;
     }
 
     if (!validateUsername(username)) {
-        setUsernameError('올바른 닉네임 형식이 아닙니다.');
-        return;
+      showFeedback('오류', '올바른 닉네임 형식이 아닙니다.');
+      return;
     }
 
     if (password !== confirmPassword) {
-      setError('비밀번호가 일치하지 않습니다.');
+      showFeedback('오류', '비밀번호가 일치하지 않습니다.');
       return;
     }
 
@@ -132,20 +149,22 @@ export default function SignupModal({ isOpen, onOpenChange }: SignupModalProps) 
         setIsWelcomeOpen(true);
       }
     } catch (error) {
-      if (error instanceof AxiosError) {
-        setError(error.response?.data?.message || '회원가입에 실패했습니다. 다시 시도해주세요.');
-      } else {
-        setError('회원가입에 실패했습니다. 다시 시도해주세요.');
-      }
+      showFeedback('오류', '회원가입에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleWelcomeClose = () => {
-    setIsWelcomeOpen(false);
+    resetState();
     onOpenChange(false);
     router.push('/');
+  };
+
+  const showFeedback = (title: string, message: string) => {
+    setFeedbackTitle(title);
+    setFeedbackMessage(message);
+    setFeedbackModalOpen(true);
   };
 
   useEffect(() => {
@@ -174,12 +193,18 @@ export default function SignupModal({ isOpen, onOpenChange }: SignupModalProps) 
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <Dialog 
+        open={isOpen} 
+        onOpenChange={(open) => {
+          if (!open) {
+            resetState();
+          }
+          onOpenChange(open);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-                {isCodeSent ? "인증코드 발송" : "인증 코드 발송"}
-            </DialogTitle>
+            <DialogTitle>회원가입</DialogTitle>
           </DialogHeader>
           <div>
             <Label htmlFor="signup-email">이메일</Label>
@@ -189,7 +214,7 @@ export default function SignupModal({ isOpen, onOpenChange }: SignupModalProps) 
               className="w-full" 
               value={email} 
               onChange={handleEmailChange} 
-              disabled={!isEmailVerificationOpen}
+              disabled={!isEmailVerificationOpen || isCodeSent}
             />
             {emailError && <div className="text-red-500">{emailError}</div>}
           </div>
@@ -203,7 +228,6 @@ export default function SignupModal({ isOpen, onOpenChange }: SignupModalProps) 
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAuthCode(e.target.value)}
                 className="w-full"
               />
-              {verificationError && <div className="text-red-500">{verificationError}</div>}
               <div className="text-right text-gray-500">{formatTime(timeLeft)}</div>
             </div>
           )}
@@ -247,7 +271,6 @@ export default function SignupModal({ isOpen, onOpenChange }: SignupModalProps) 
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)} 
                 />
               </div>
-              {error && <div className="text-red-500">{error}</div>}
               <div className="flex justify-end mt-4">
                 <Button onClick={handleSignup} disabled={isLoading}>가입</Button>
               </div>
@@ -269,10 +292,13 @@ export default function SignupModal({ isOpen, onOpenChange }: SignupModalProps) 
           </div>
         </DialogContent>
       </Dialog>
+
+      <FeedbackModal
+        isOpen={feedbackModalOpen}
+        onOpenChange={setFeedbackModalOpen}
+        title={feedbackTitle}
+        message={feedbackMessage}
+      />
     </>
   );
 }
-
-
-
-// todo: 백엔드에서 이메일 중복, 닉네임 중복 api 만들기
