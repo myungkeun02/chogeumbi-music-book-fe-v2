@@ -1,12 +1,9 @@
-
-
-import Component from "@/components/component";
-import Image from "next/image";
+import MainComponent from "@/components/MainComponent";
 
 export default function Home() {
   return (
-    <Component>
+    <MainComponent>
       {/* Add any children components or content here */}
-    </Component>
+    </MainComponent>
   );
 }
