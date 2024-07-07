@@ -13,7 +13,8 @@ interface AddMusicModalProps {
   selectedAlbumArtUrl: string;
   setSelectedAlbumArtUrl: (url: string) => void;
   setIsSearchMusicModalOpen: (isOpen: boolean) => void;
-  onMusicAdded: () => void;
+  onMusicAdded: (music: MusicData) => void;
+  initialMusic: MusicData | null;
 }
 
 interface Category {
@@ -26,13 +27,22 @@ interface Artist {
   authorName: string;
 }
 
+interface MusicData {
+  id: string;
+  albumCover: string;
+  musicName: string;
+  author: { authorName: string };
+  category: { categoryName: string; categoryColor: string };
+}
+
 export default function AddMusicModal({ 
   isOpen, 
   onOpenChange, 
   selectedAlbumArtUrl, 
   setSelectedAlbumArtUrl,
   setIsSearchMusicModalOpen,
-  onMusicAdded
+  onMusicAdded,
+  initialMusic
 }: AddMusicModalProps) {
   const [musicName, setMusicName] = useState("");
   const [artistName, setArtistName] = useState("");
@@ -51,8 +61,14 @@ export default function AddMusicModal({
     } else {
       fetchCategories();
       fetchArtists();
+      if (initialMusic) {
+        setMusicName(initialMusic.musicName);
+        setArtistName(initialMusic.author.authorName);
+        setCategoryName(initialMusic.category.categoryName);
+        setSelectedAlbumArtUrl(initialMusic.albumCover);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, initialMusic, setSelectedAlbumArtUrl]);
 
   const resetForm = () => {
     setMusicName("");
@@ -87,31 +103,41 @@ export default function AddMusicModal({
     }
   }, []);
 
-  const handleAddMusic = async (e: FormEvent) => {
+  const handleAddOrEditMusic = async (e: FormEvent) => {
     e.preventDefault();
     const accessToken = Cookies.get('accessToken');
-    try {
-      const response = await axios.post('https://chogeumbi.kr/api/v1/music', {
-        musicName: musicName,
-        albumCover: selectedAlbumArtUrl,
-        author: artistName,
-        category: categoryName
-      }, {
-        headers: { 'Authorization': `Bearer ${accessToken}` }
-      });
+    const musicData = {
+      musicName: musicName,
+      albumCover: selectedAlbumArtUrl,
+      author: artistName,
+      category: categoryName
+    };
 
-      if (response.data.statusCode === 201) {
+    
+    try {
+      let response;
+      if (initialMusic) {
+        response = await axios.put(`https://chogeumbi.kr/api/v1/music/${initialMusic.id}`, musicData, {
+          headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+      } else {
+        response = await axios.post('https://chogeumbi.kr/api/v1/music', musicData, {
+          headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+      }
+
+      if (response.data.statusCode === 200 || response.data.statusCode === 201) {
         setFeedbackTitle("성공");
-        setFeedbackMessage(`음악 "${response.data.data.musicName}"이(가) 성공적으로 추가되었습니다.`);
+        setFeedbackMessage(`음악 "${response.data.data.musicName}"이(가) 성공적으로 ${initialMusic ? '수정' : '추가'}되었습니다.`);
         resetForm();
-        onMusicAdded();  // 음악 데이터를 새로고침
+        onMusicAdded(response.data.data);
       } else {
         throw new Error(response.data.message || "Unexpected response status");
       }
     } catch (error) {
-      console.error("Failed to add music:", error);
+      console.error(`Failed to ${initialMusic ? 'edit' : 'add'} music:`, error);
       setFeedbackTitle("실패");
-      setFeedbackMessage("음악 추가에 실패했습니다. 다시 시도해주세요.");
+      setFeedbackMessage(`음악 ${initialMusic ? '수정' : '추가'}에 실패했습니다. 다시 시도해주세요.`);
     }
     setIsFeedbackModalOpen(true);
     onOpenChange(false);
@@ -150,9 +176,9 @@ export default function AddMusicModal({
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>음악 추가</DialogTitle>
+            <DialogTitle>{initialMusic ? '음악 수정' : '음악 추가'}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleAddMusic}>
+          <form onSubmit={handleAddOrEditMusic}>
             <div>
               <Label htmlFor="music-name">음악 이름</Label>
               <Input
@@ -228,7 +254,7 @@ export default function AddMusicModal({
               >앨범 아트 검색</Button>
             </div>
             <div className="flex justify-end mt-4">
-              <Button type="submit">추가</Button>
+              <Button type="submit">{initialMusic ? '수정' : '추가'}</Button>
             </div>
           </form>
         </DialogContent>
