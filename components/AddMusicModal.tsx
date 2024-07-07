@@ -10,10 +10,10 @@ import { FeedbackModal } from "./FeedbackModal";
 interface AddMusicModalProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
+  onMusicAdded: (music: MusicData) => void;
   selectedAlbumArtUrl: string;
   setSelectedAlbumArtUrl: (url: string) => void;
   setIsSearchMusicModalOpen: (isOpen: boolean) => void;
-  onMusicAdded: (music: MusicData) => void;
   initialMusic: MusicData | null;
 }
 
