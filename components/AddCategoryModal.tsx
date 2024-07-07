@@ -1,4 +1,4 @@
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -10,52 +10,83 @@ import Cookies from "js-cookie";
 interface AddCategoryModalProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onCategoryAdded: () => void;
+  onCategoryAdded: (category: any) => void;
+  initialCategory?: {
+    id: number;
+    categoryName: string;
+    categoryColor: string;
+  };
 }
 
-export default function AddCategoryModal({ isOpen, onOpenChange, onCategoryAdded }: AddCategoryModalProps) {
-  const [newCategoryName, setNewCategoryName] = useState("");
-  const [newCategoryColor, setNewCategoryColor] = useState("#000000");
+export default function AddCategoryModal({ isOpen, onOpenChange, onCategoryAdded, initialCategory }: AddCategoryModalProps) {
+  const [categoryName, setCategoryName] = useState("");
+  const [categoryColor, setCategoryColor] = useState("#000000");
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [feedbackTitle, setFeedbackTitle] = useState("");
   const [feedbackMessage, setFeedbackMessage] = useState("");
 
+  useEffect(() => {
+    if (initialCategory) {
+      setCategoryName(initialCategory.categoryName);
+      setCategoryColor("#" + initialCategory.categoryColor);
+    } else {
+      resetForm();
+    }
+  }, [initialCategory, isOpen]);
+
   const resetForm = () => {
-    setNewCategoryName("");
-    setNewCategoryColor("#000000");
+    setCategoryName("");
+    setCategoryColor("#000000");
   };
 
-  const handleAddCategory = async (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const accessToken = Cookies.get('accessToken');
     
     try {
-      const response = await axios.post(
-        "https://chogeumbi.kr/api/v1/category", 
-        {
-          categoryName: newCategoryName,
-          categoryColor: newCategoryColor.slice(1) // '#'를 제거하여 문자열 형태로 변환
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
+      let response;
+      if (initialCategory) {
+        response = await axios.put(
+          `https://chogeumbi.kr/api/v1/category/${initialCategory.id}`,
+          {
+            categoryName: categoryName,
+            categoryColor: categoryColor.slice(1)
+          },
+          {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Content-Type': 'application/json'
+            }
           }
-        }
-      );
+        );
+      } else {
+        response = await axios.post(
+          "https://chogeumbi.kr/api/v1/category", 
+          {
+            categoryName: categoryName,
+            categoryColor: categoryColor.slice(1)
+          },
+          {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+      }
 
-      if (response.data.statusCode === 201) {
+      if (response.data.statusCode === 200 || response.data.statusCode === 201) {
         setFeedbackTitle("성공");
-        setFeedbackMessage(`카테고리 "${response.data.data.categoryName}"가 성공적으로 추가되었습니다.`);
+        setFeedbackMessage(`카테고리 "${response.data.data.categoryName}"가 성공적으로 ${initialCategory ? '수정' : '추가'}되었습니다.`);
         resetForm();
-        onCategoryAdded();  // 카테고리 추가 후 SideMenu의 카테고리 목록 갱신
+        onCategoryAdded(response.data.data);
       } else {
         throw new Error(response.data.message || "Unexpected response status");
       }
     } catch (error) {
-      console.error("Error adding category:", error);
+      console.error("Error adding/editing category:", error);
       setFeedbackTitle("실패");
-      setFeedbackMessage("카테고리 추가에 실패했습니다. 다시 시도해주세요.");
+      setFeedbackMessage(`카테고리 ${initialCategory ? '수정' : '추가'}에 실패했습니다. 다시 시도해주세요.`);
     }
 
     setIsFeedbackModalOpen(true);
@@ -65,7 +96,7 @@ export default function AddCategoryModal({ isOpen, onOpenChange, onCategoryAdded
   const handleFeedbackModalClose = (isOpen: boolean) => {
     setIsFeedbackModalOpen(isOpen);
     if (!isOpen) {
-      onOpenChange(true); // 피드백 모달이 닫힐 때 카테고리 추가 모달을 다시 엽니다.
+      onOpenChange(true);
     }
   };
 
@@ -74,16 +105,16 @@ export default function AddCategoryModal({ isOpen, onOpenChange, onCategoryAdded
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>카테고리 추가</DialogTitle>
+            <DialogTitle>{initialCategory ? '카테고리 수정' : '카테고리 추가'}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleAddCategory}>
+          <form onSubmit={handleSubmit}>
             <div className="mb-4">
               <Label htmlFor="category-name">카테고리 이름</Label>
               <Input
                 id="category-name"
                 type="text"
-                value={newCategoryName}
-                onChange={(e) => setNewCategoryName(e.target.value)}
+                value={categoryName}
+                onChange={(e) => setCategoryName(e.target.value)}
                 className="w-full"
               />
             </div>
@@ -93,17 +124,17 @@ export default function AddCategoryModal({ isOpen, onOpenChange, onCategoryAdded
                 <Input
                   id="category-color"
                   type="color"
-                  value={newCategoryColor}
-                  onChange={(e) => setNewCategoryColor(e.target.value)}
+                  value={categoryColor}
+                  onChange={(e) => setCategoryColor(e.target.value)}
                   className="w-12 h-12 p-1 mr-2"
                 />
-                <span>{newCategoryColor}</span>
+                <span>{categoryColor}</span>
               </div>
             </div>
             <div className="flex justify-end mt-4">
-              <Button type="submit">추가</Button>
+              <Button type="submit">{initialCategory ? '수정' : '추가'}</Button>
             </div>
-          </form>
+            </form>
         </DialogContent>
       </Dialog>
       <FeedbackModal

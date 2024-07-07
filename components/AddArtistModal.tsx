@@ -1,4 +1,4 @@
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -10,53 +10,83 @@ import { FeedbackModal } from "./FeedbackModal";
 interface AddArtistModalProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onArtistAdded: () => void;
+  onArtistAdded: (artist: any) => void;
+  initialArtist?: {
+    id: number;
+    authorName: string;
+    subName: string;
+  };
 }
 
-export default function AddArtistModal({ isOpen, onOpenChange, onArtistAdded }: AddArtistModalProps) {
-  const [newArtistName, setNewArtistName] = useState("");
-  const [newArtistSubName, setNewArtistSubName] = useState("");
+export default function AddArtistModal({ isOpen, onOpenChange, onArtistAdded, initialArtist }: AddArtistModalProps) {
+  const [artistName, setArtistName] = useState("");
+  const [artistSubName, setArtistSubName] = useState("");
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [feedbackTitle, setFeedbackTitle] = useState("");
   const [feedbackMessage, setFeedbackMessage] = useState("");
 
+  useEffect(() => {
+    if (initialArtist) {
+      setArtistName(initialArtist.authorName);
+      setArtistSubName(initialArtist.subName);
+    } else {
+      resetForm();
+    }
+  }, [initialArtist, isOpen]);
+
   const resetForm = () => {
-    setNewArtistName("");
-    setNewArtistSubName("");
+    setArtistName("");
+    setArtistSubName("");
   };
 
-  const handleAddArtist = async (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const accessToken = Cookies.get('accessToken');
 
     try {
-      const response = await axios.post(
-        'https://chogeumbi.kr/api/v1/author',
-        {
-          authorName: newArtistName,
-          subName: newArtistSubName
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
+      let response;
+      if (initialArtist) {
+        response = await axios.put(
+          `https://chogeumbi.kr/api/v1/author/${initialArtist.id}`,
+          {
+            authorName: artistName,
+            subName: artistSubName
+          },
+          {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Content-Type': 'application/json'
+            }
           }
-        }
-      );
-
+        );
+      } else {
+        response = await axios.post(
+          'https://chogeumbi.kr/api/v1/author',
+          {
+            authorName: artistName,
+            subName: artistSubName
+          },
+          {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+      }
       
-      if (response.data.statusCode === 200) {
+      if (response.data.statusCode === 200 || response.data.statusCode === 201) {
         setFeedbackTitle("성공");
-        setFeedbackMessage(`아티스트 "${response.data.data.authorName}"이(가) 성공적으로 추가되었습니다.`);
+        setFeedbackMessage(`아티스트 "${response.data.data.authorName}"이(가) 성공적으로 ${initialArtist ? '수정' : '추가'}되었습니다.`);
         resetForm();
-        onArtistAdded();
+        onArtistAdded(response.data.data);
       } else {
         throw new Error(response.data.message || "Unexpected response status");
       }
     } catch (error) {
-      console.error("Error adding author:", error);
+      console.error("Error adding/editing artist:", error);
       setFeedbackTitle("실패");
-      setFeedbackMessage("아티스트 추가에 실패했습니다. 다시 시도해주세요.");
+      setFeedbackMessage(`아티스트 ${initialArtist ? '수정' : '추가'}에 실패했습니다. 다시 시도해주세요.`);
     }
 
     setIsFeedbackModalOpen(true);
@@ -66,7 +96,7 @@ export default function AddArtistModal({ isOpen, onOpenChange, onArtistAdded }: 
   const handleFeedbackModalClose = (isOpen: boolean) => {
     setIsFeedbackModalOpen(isOpen);
     if (!isOpen) {
-      onOpenChange(true); // 피드백 모달이 닫힐 때 아티스트 추가 모달을 다시 엽니다.
+      onOpenChange(true);
     }
   };
 
@@ -75,16 +105,16 @@ export default function AddArtistModal({ isOpen, onOpenChange, onArtistAdded }: 
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>아티스트 추가</DialogTitle>
+            <DialogTitle>{initialArtist ? '아티스트 수정' : '아티스트 추가'}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleAddArtist}>
+          <form onSubmit={handleSubmit}>
             <div>
               <Label htmlFor="artist-name">아티스트 이름</Label>
               <Input
                 id="artist-name"
                 type="text"
-                value={newArtistName}
-                onChange={(e) => setNewArtistName(e.target.value)}
+                value={artistName}
+                onChange={(e) => setArtistName(e.target.value)}
                 className="w-full"
               />
             </div>
@@ -93,13 +123,13 @@ export default function AddArtistModal({ isOpen, onOpenChange, onArtistAdded }: 
               <Input
                 id="artist-subname"
                 type="text"
-                value={newArtistSubName}
-                onChange={(e) => setNewArtistSubName(e.target.value)}
+                value={artistSubName}
+                onChange={(e) => setArtistSubName(e.target.value)}
                 className="w-full"
               />
             </div>
             <div className="flex justify-end mt-4">
-              <Button type="submit">추가</Button>
+              <Button type="submit">{initialArtist ? '수정' : '추가'}</Button>
             </div>
           </form>
         </DialogContent>
