@@ -82,7 +82,7 @@ export default function MainComponent() {
             categoryColor: music.category.categoryColor || generateRandomColor()
           }
         }));
-        const filteredMusicList = musicListWithColor.filter(music => 
+        const filteredMusicList = musicListWithColor.filter((music: MusicData) => 
           (selectedCategories.length === 0 || selectedCategories.includes(music.category.categoryName)) &&
           (selectedArtists.length === 0 || selectedArtists.includes(music.author.authorName))
         );
