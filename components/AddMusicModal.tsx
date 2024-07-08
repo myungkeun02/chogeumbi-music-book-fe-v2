@@ -10,7 +10,8 @@ import { FeedbackModal } from "./FeedbackModal";
 interface AddMusicModalProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onMusicAdded: (music: MusicData) => void;
+  onMusicAdded: (music: MusicData, newCategory: boolean, newArtist: boolean) => void;
+  onMusicUpdated: (music: MusicData, newCategory: boolean, newArtist: boolean) => void;
   selectedAlbumArtUrl: string;
   setSelectedAlbumArtUrl: (url: string) => void;
   setIsSearchMusicModalOpen: (isOpen: boolean) => void;
@@ -42,7 +43,8 @@ export default function AddMusicModal({
   setSelectedAlbumArtUrl,
   setIsSearchMusicModalOpen,
   onMusicAdded,
-  initialMusic
+  onMusicUpdated,
+  initialMusic,
 }: AddMusicModalProps) {
   const [musicName, setMusicName] = useState("");
   const [artistName, setArtistName] = useState("");
@@ -105,6 +107,7 @@ export default function AddMusicModal({
 
   const handleAddOrEditMusic = async (e: FormEvent) => {
     e.preventDefault();
+
     const accessToken = Cookies.get('accessToken');
     const musicData = {
       musicName: musicName,
@@ -113,7 +116,6 @@ export default function AddMusicModal({
       category: categoryName
     };
 
-    
     try {
       let response;
       if (initialMusic) {
@@ -127,20 +129,49 @@ export default function AddMusicModal({
       }
 
       if (response.data.statusCode === 200 || response.data.statusCode === 201) {
+        let feedbackMessage = `음악 "${response.data.data.music.musicName}"이(가) 성공적으로 ${initialMusic ? '수정' : '추가'}되었습니다.`;
+        let newCategory = response.data.data.generatedCategory;
+        let newArtist = response.data.data.generatedAuthor;
+        
+        if (newArtist) {
+            feedbackMessage += `\n새로운 아티스트 "${response.data.data.music.author.authorName}"가 생성되었습니다.`;
+        }
+        if (newCategory) {
+            feedbackMessage += `\n새로운 카테고리 "${response.data.data.music.category.categoryName}"가 생성되었습니다.`;
+        }
+    
+
         setFeedbackTitle("성공");
-        setFeedbackMessage(`음악 "${response.data.data.musicName}"이(가) 성공적으로 ${initialMusic ? '수정' : '추가'}되었습니다.`);
+        setFeedbackMessage(feedbackMessage);
         resetForm();
-        onMusicAdded(response.data.data);
+        
+        const musicData: MusicData = {
+          id: response.data.data.music.id,
+          albumCover: response.data.data.music.albumCover,
+          musicName: response.data.data.music.musicName,
+          author: { authorName: response.data.data.music.author.authorName },
+          category: { 
+            categoryName: response.data.data.music.category.categoryName,
+            categoryColor: response.data.data.music.category.categoryColor
+          }
+        };
+
+        if (initialMusic) {
+          onMusicUpdated(musicData, newCategory, newArtist);
+        } else {
+          onMusicAdded(musicData, newCategory, newArtist);
+        }
+        onOpenChange(false);
+        setIsFeedbackModalOpen(true);
       } else {
         throw new Error(response.data.message || "Unexpected response status");
       }
     } catch (error) {
       console.error(`Failed to ${initialMusic ? 'edit' : 'add'} music:`, error);
       setFeedbackTitle("실패");
-      setFeedbackMessage(`음악 ${initialMusic ? '수정' : '추가'}에 실패했습니다. 다시 시도해주세요.`);
+      setFeedbackMessage(`음악 ${initialMusic ? '수정' : '추가'}에 실패했습니다. 다시 시도해주세요. (중복된 음악)`);
+      setIsFeedbackModalOpen(true);
     }
-    setIsFeedbackModalOpen(true);
-    onOpenChange(false);
   };
 
   const handleCategorySearch = (searchTerm: string) => {

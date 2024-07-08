@@ -29,6 +29,8 @@ export default function SignupModal({ isOpen, onOpenChange }: SignupModalProps) 
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [feedbackTitle, setFeedbackTitle] = useState('');
   const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [capsLockOn, setCapsLockOn] = useState(false);
+  const [isHangul, setIsHangul] = useState(false);
   const router = useRouter();
 
   const resetState = () => {
@@ -45,6 +47,8 @@ export default function SignupModal({ isOpen, onOpenChange }: SignupModalProps) 
     setIsLoading(false);
     setIsCodeLoading(false);
     setTimeLeft(300);
+    setCapsLockOn(false);
+    setIsHangul(false);
   };
 
   const validateEmail = (email: string): boolean => {
@@ -167,6 +171,18 @@ export default function SignupModal({ isOpen, onOpenChange }: SignupModalProps) 
     setFeedbackModalOpen(true);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    setCapsLockOn(e.getModifierState('CapsLock'));
+  };
+
+  const handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    setCapsLockOn(e.getModifierState('CapsLock'));
+  };
+
+  const handleComposition = (e: React.CompositionEvent<HTMLInputElement>) => {
+    setIsHangul(e.type === 'compositionstart');
+  };
+
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isCodeSent && timeLeft > 0) {
@@ -258,8 +274,14 @@ export default function SignupModal({ isOpen, onOpenChange }: SignupModalProps) 
                   type="password" 
                   className="w-full" 
                   value={password} 
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)} 
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  onKeyUp={handleKeyUp}
+                  onCompositionStart={handleComposition}
+                  onCompositionEnd={handleComposition}
                 />
+                {capsLockOn && <div className="text-yellow-500">Caps Lock이 켜져 있습니다.</div>}
+                {isHangul && <div className="text-yellow-500">한글 입력 모드입니다.</div>}
               </div>
               <div>
                 <Label htmlFor="signup-confirm-password">비밀번호 확인</Label>
@@ -268,8 +290,14 @@ export default function SignupModal({ isOpen, onOpenChange }: SignupModalProps) 
                   type="password" 
                   className="w-full" 
                   value={confirmPassword} 
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)} 
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  onKeyUp={handleKeyUp}
+                  onCompositionStart={handleComposition}
+                  onCompositionEnd={handleComposition}
                 />
+                {capsLockOn && <div className="text-yellow-500">Caps Lock이 켜져 있습니다.</div>}
+                {isHangul && <div className="text-yellow-500">한글 입력 모드입니다.</div>}
               </div>
               <div className="flex justify-end mt-4">
                 <Button onClick={handleSignup} disabled={isLoading}>가입</Button>
