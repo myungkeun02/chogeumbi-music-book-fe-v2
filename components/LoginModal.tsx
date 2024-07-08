@@ -19,6 +19,8 @@ export default function LoginModal({ isOpen, onOpenChange, setIsMenuOpen }: Logi
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [feedbackTitle, setFeedbackTitle] = useState('');
   const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [capsLockOn, setCapsLockOn] = useState(false);
+  const [isHangul, setIsHangul] = useState(false);
   const { login } = useAuth();
 
   const handleLogin = async () => {
@@ -39,6 +41,18 @@ export default function LoginModal({ isOpen, onOpenChange, setIsMenuOpen }: Logi
     setFeedbackTitle(title);
     setFeedbackMessage(message);
     setFeedbackModalOpen(true);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    setCapsLockOn(e.getModifierState('CapsLock'));
+  };
+
+  const handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    setCapsLockOn(e.getModifierState('CapsLock'));
+  };
+
+  const handleComposition = (e: React.CompositionEvent<HTMLInputElement>) => {
+    setIsHangul(e.type === 'compositionstart');
   };
 
   return (
@@ -68,7 +82,13 @@ export default function LoginModal({ isOpen, onOpenChange, setIsMenuOpen }: Logi
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
+              onKeyDown={handleKeyDown}
+              onKeyUp={handleKeyUp}
+              onCompositionStart={handleComposition}
+              onCompositionEnd={handleComposition}
             />
+            {capsLockOn && <div className="text-yellow-500">Caps Lock이 켜져 있습니다.</div>}
+            {isHangul && <div className="text-yellow-500">한글 입력 모드입니다.</div>}
           </div>
           <div className="flex justify-end mt-4">
             <Button onClick={handleLogin} disabled={isLoading}>

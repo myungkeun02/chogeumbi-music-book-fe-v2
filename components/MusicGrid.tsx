@@ -65,16 +65,18 @@ export default function MusicGrid({
         >
           <div onClick={() => handleClick(music)}>
             <div className="relative aspect-square">
-              <img
-                src={music.albumCover}
-                alt={music.musicName}
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
-              />
+              <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+                <img
+                  src={music.albumCover}
+                  alt={music.musicName}
+                  className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                />
+              </div>
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
             </div>
             <div className="p-3">
-              <div className="text-lg font-bold">{music.musicName}</div>
-              <div className="text-sm text-muted-foreground">
+              <div className="text-lg font-bold truncate">{music.musicName}</div>
+              <div className="text-sm text-muted-foreground truncate">
                 {music.author.authorName}
               </div>
               <div 

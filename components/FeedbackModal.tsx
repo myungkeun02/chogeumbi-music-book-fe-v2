@@ -15,7 +15,7 @@ export function FeedbackModal({ isOpen, onOpenChange, title, message }: Feedback
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
-        <p>{message}</p>
+        <div className="whitespace-pre-wrap">{message}</div>
         <div className="flex justify-end mt-4">
           <Button onClick={() => onOpenChange(false)}>확인</Button>
         </div>

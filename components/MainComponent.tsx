@@ -75,13 +75,16 @@ export default function MainComponent() {
         }
       });
       if (response.data && response.data.data && response.data.data.musicList) {
-        const musicListWithColor = response.data.data.musicList.map((music: MusicData) => ({
-          ...music,
-          category: {
-            ...music.category,
-            categoryColor: music.category.categoryColor || generateRandomColor()
-          }
-        }));
+        const musicListWithColor = response.data.data.musicList.map((music: any) => ({
+            id: music.id,
+            albumCover: music.albumCover,
+            musicName: music.musicName,
+            author: { authorName: music.author.authorName },
+            category: { 
+              categoryName: music.category.categoryName, 
+              categoryColor: music.category.categoryColor || generateRandomColor() 
+            }
+          }));
         const filteredMusicList = musicListWithColor.filter((music: MusicData) => 
           (selectedCategories.length === 0 || selectedCategories.includes(music.category.categoryName)) &&
           (selectedArtists.length === 0 || selectedArtists.includes(music.author.authorName))
@@ -210,12 +213,45 @@ export default function MainComponent() {
     }
   }, [deleteMusicId]);
 
-  const handleMusicAdded = useCallback((music: MusicData) => {
-    setMusicData(prev => [music, ...prev]);
-    setFilteredMusicData(prev => [music, ...prev]);
+  const handleMusicAdded = useCallback((music: any, newCategory: boolean, newArtist: boolean) => {
+    const newMusic = {
+      id: music.id,
+      albumCover: music.albumCover,
+      musicName: music.musicName,
+      author: { authorName: music.author.authorName },
+      category: { 
+        categoryName: music.category.categoryName, 
+        categoryColor: music.category.categoryColor || generateRandomColor() 
+      }
+    };
+    setMusicData(prev => [newMusic, ...prev]);
+    setFilteredMusicData(prev => [newMusic, ...prev]);
     setSelectedMusic(null);
     setIsAddMusicModalOpen(false);
-  }, []);
+    if (newCategory || newArtist) {
+      refreshSideMenu();
+    }
+  }, [refreshSideMenu]);
+
+  const handleMusicUpdated = useCallback((music: any, newCategory: boolean, newArtist: boolean) => {
+    const updatedMusic = {
+      id: music.id,
+      albumCover: music.albumCover,
+      musicName: music.musicName,
+      author: { authorName: music.author.authorName },
+      category: { 
+        categoryName: music.category.categoryName, 
+        categoryColor: music.category.categoryColor || generateRandomColor() 
+      }
+    };
+    setMusicData(prev => prev.map(item => item.id === updatedMusic.id ? updatedMusic : item));
+    setFilteredMusicData(prev => prev.map(item => item.id === updatedMusic.id ? updatedMusic : item));
+    setSelectedMusic(null);
+    setIsAddMusicModalOpen(false);
+    if (newCategory || newArtist) {
+      refreshSideMenu();
+    }
+  }, [refreshSideMenu]);
 
   const handleCategorySelect = useCallback((categoryName: string) => {
     setSelectedCategories(prev => {
@@ -285,6 +321,7 @@ export default function MainComponent() {
             setSelectedAlbumArtUrl={setSelectedAlbumArtUrl}
             setIsSearchMusicModalOpen={setIsSearchMusicModalOpen}
             onMusicAdded={handleMusicAdded}
+            onMusicUpdated={handleMusicUpdated}
             initialMusic={selectedMusic}
           />
           <SearchMusicModal 
