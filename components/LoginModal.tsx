@@ -58,42 +58,44 @@ export default function LoginModal({ isOpen, onOpenChange, setIsMenuOpen }: Logi
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>로그인</DialogTitle>
           </DialogHeader>
-          <div>
-            <Label htmlFor="login-email">이메일</Label>
-            <Input 
-              id="login-email" 
-              type="email" 
-              className="w-full" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-          <div>
-            <Label htmlFor="login-password">비밀번호</Label>
-            <Input 
-              id="login-password" 
-              type="password" 
-              className="w-full" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={isLoading}
-              onKeyDown={handleKeyDown}
-              onKeyUp={handleKeyUp}
-              onCompositionStart={handleComposition}
-              onCompositionEnd={handleComposition}
-            />
-            {capsLockOn && <div className="text-yellow-500">Caps Lock이 켜져 있습니다.</div>}
-            {isHangul && <div className="text-yellow-500">한글 입력 모드입니다.</div>}
-          </div>
-          <div className="flex justify-end mt-4">
-            <Button onClick={handleLogin} disabled={isLoading}>
-              {isLoading ? '로그인 중...' : '로그인'}
-            </Button>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="login-email">이메일</Label>
+              <Input 
+                id="login-email" 
+                type="email" 
+                className="w-full" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="login-password">비밀번호</Label>
+              <Input 
+                id="login-password" 
+                type="password" 
+                className="w-full" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
+                onKeyDown={handleKeyDown}
+                onKeyUp={handleKeyUp}
+                onCompositionStart={handleComposition}
+                onCompositionEnd={handleComposition}
+              />
+              {capsLockOn && <div className="text-yellow-500 text-sm">Caps Lock이 켜져 있습니다.</div>}
+              {isHangul && <div className="text-yellow-500 text-sm">한글 입력 모드입니다.</div>}
+            </div>
+            <div className="flex justify-end">
+              <Button onClick={handleLogin} disabled={isLoading}>
+                {isLoading ? '로그인 중...' : '로그인'}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

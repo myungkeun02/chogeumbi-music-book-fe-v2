@@ -26,26 +26,39 @@ export default function UserInfoModal({ isOpen, onOpenChange, user }: UserInfoMo
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>회원 정보</DialogTitle>
+            <DialogTitle className="text-2xl font-bold">회원 정보</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <strong>이름:</strong> {user.username}
+          <div className="space-y-6 py-4">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <span className="text-gray-500 font-medium w-20">이름:</span>
+                <span className="font-semibold">{user.username}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-gray-500 font-medium w-20">이메일:</span>
+                <span className="font-semibold">{user.email}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-gray-500 font-medium w-20">권한:</span>
+                <span className="font-semibold">
+                  {user.role === 'ADMIN' ? '관리자' : '일반 사용자'}
+                </span>
+              </div>
+              {/* <div className="flex items-center space-x-2">
+                <span className="text-gray-500 font-medium w-20">레벨:</span>
+                <span className="font-semibold">{user.level}</span>
+              </div> */}
             </div>
-            <div>
-              <strong>이메일:</strong> {user.email}
+            <div className="pt-4 border-t border-gray-200">
+              <Button 
+                onClick={() => setIsChangeNicknameModalOpen(true)}
+                className="w-full"
+              >
+                닉네임 변경
+              </Button>
             </div>
-            <div>
-              <strong>권한:</strong> {user.role === 'ADMIN' ? '관리자' : '일반 사용자'}
-            </div>
-            {/* <div>
-              <strong>레벨:</strong> {user.level}
-            </div> */}
-            <Button onClick={() => setIsChangeNicknameModalOpen(true)}>
-              닉네임 변경
-            </Button>
           </div>
         </DialogContent>
       </Dialog>

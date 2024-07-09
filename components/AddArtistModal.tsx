@@ -103,12 +103,12 @@ export default function AddArtistModal({ isOpen, onOpenChange, onArtistAdded, in
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>{initialArtist ? '아티스트 수정' : '아티스트 추가'}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit}>
-            <div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
               <Label htmlFor="artist-name">아티스트 이름</Label>
               <Input
                 id="artist-name"
@@ -118,7 +118,7 @@ export default function AddArtistModal({ isOpen, onOpenChange, onArtistAdded, in
                 className="w-full"
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="artist-subname">아티스트 별명</Label>
               <Input
                 id="artist-subname"
@@ -128,8 +128,13 @@ export default function AddArtistModal({ isOpen, onOpenChange, onArtistAdded, in
                 className="w-full"
               />
             </div>
-            <div className="flex justify-end mt-4">
-              <Button type="submit">{initialArtist ? '수정' : '추가'}</Button>
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                취소
+              </Button>
+              <Button type="submit">
+                {initialArtist ? '수정' : '추가'}
+              </Button>
             </div>
           </form>
         </DialogContent>

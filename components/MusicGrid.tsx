@@ -56,7 +56,7 @@ export default function MusicGrid({
   };
 
   return (
-    <div className="container mx-auto px-12 py-20 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+    <div className="container mx-auto px-2 sm:px-4 py-20 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols- gap-4">
       {musicData.map((music, index) => (
         <div 
           key={music.id} 
@@ -69,13 +69,13 @@ export default function MusicGrid({
                 <img
                   src={music.albumCover}
                   alt={music.musicName}
-                  className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
             </div>
             <div className="p-3">
-              <div className="text-lg font-bold truncate">{music.musicName}</div>
+              <div className="text-base font-bold truncate">{music.musicName}</div>
               <div className="text-sm text-muted-foreground truncate">
                 {music.author.authorName}
               </div>

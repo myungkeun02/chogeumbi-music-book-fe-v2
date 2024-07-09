@@ -57,10 +57,17 @@ export default function AddMusicModal({
   const [feedbackTitle, setFeedbackTitle] = useState("");
   const [feedbackMessage, setFeedbackMessage] = useState("");
 
+  const resetForm = useCallback(() => {
+    setMusicName("");
+    setArtistName("");
+    setCategoryName("");
+    setSelectedAlbumArtUrl("");
+    setFilteredCategories([]);
+    setFilteredArtists([]);
+  }, [setSelectedAlbumArtUrl]);
+
   useEffect(() => {
-    if (!isOpen) {
-      resetForm();
-    } else {
+    if (isOpen) {
       fetchCategories();
       fetchArtists();
       if (initialMusic) {
@@ -68,18 +75,13 @@ export default function AddMusicModal({
         setArtistName(initialMusic.author.authorName);
         setCategoryName(initialMusic.category.categoryName);
         setSelectedAlbumArtUrl(initialMusic.albumCover);
+      } else {
+        resetForm();
       }
+    } else {
+      resetForm();
     }
-  }, [isOpen, initialMusic, setSelectedAlbumArtUrl]);
-
-  const resetForm = () => {
-    setMusicName("");
-    setArtistName("");
-    setCategoryName("");
-    setSelectedAlbumArtUrl("");
-    setFilteredCategories([]);
-    setFilteredArtists([]);
-  };
+  }, [isOpen, initialMusic, setSelectedAlbumArtUrl, resetForm]);
 
   const fetchCategories = useCallback(async () => {
     const accessToken = Cookies.get('accessToken');
@@ -107,6 +109,13 @@ export default function AddMusicModal({
 
   const handleAddOrEditMusic = async (e: FormEvent) => {
     e.preventDefault();
+
+    if (!musicName || !artistName || !categoryName || !selectedAlbumArtUrl) {
+      setFeedbackTitle("실패");
+      setFeedbackMessage("모든 필드를 채워주세요.");
+      setIsFeedbackModalOpen(true);
+      return;
+    }
 
     const accessToken = Cookies.get('accessToken');
     const musicData = {
@@ -140,10 +149,8 @@ export default function AddMusicModal({
             feedbackMessage += `\n새로운 카테고리 "${response.data.data.music.category.categoryName}"가 생성되었습니다.`;
         }
     
-
         setFeedbackTitle("성공");
         setFeedbackMessage(feedbackMessage);
-        resetForm();
         
         const musicData: MusicData = {
           id: response.data.data.music.id,
@@ -161,7 +168,7 @@ export default function AddMusicModal({
         } else {
           onMusicAdded(musicData, newCategory, newArtist);
         }
-        onOpenChange(false);
+        handleCloseModal();
         setIsFeedbackModalOpen(true);
       } else {
         throw new Error(response.data.message || "Unexpected response status");
@@ -202,15 +209,20 @@ export default function AddMusicModal({
     setFilteredArtists([]);
   };
 
+  const handleCloseModal = useCallback(() => {
+    resetForm();
+    onOpenChange(false);
+  }, [resetForm, onOpenChange]);
+
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent>
+      <Dialog open={isOpen} onOpenChange={handleCloseModal}>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>{initialMusic ? '음악 수정' : '음악 추가'}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleAddOrEditMusic}>
-            <div>
+          <form onSubmit={handleAddOrEditMusic} className="space-y-4">
+            <div className="space-y-2">
               <Label htmlFor="music-name">음악 이름</Label>
               <Input
                 id="music-name"
@@ -220,7 +232,7 @@ export default function AddMusicModal({
                 className="w-full"
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="music-artist">아티스트</Label>
               <Input
                 id="music-artist"
@@ -230,12 +242,12 @@ export default function AddMusicModal({
                 className="w-full"
               />
               {filteredArtists.length > 0 && (
-                <ul className="mt-2 max-h-40 overflow-auto">
+                <ul className="mt-1 max-h-32 overflow-auto bg-background border rounded-md">
                   {filteredArtists.map((artist) => (
                     <li
                       key={artist.id}
                       onClick={() => handleArtistSelect(artist)}
-                      className="cursor-pointer hover:bg-gray-100 p-2"
+                      className="cursor-pointer hover:bg-muted px-2 py-1 text-sm"
                     >
                       {artist.authorName}
                     </li>
@@ -243,7 +255,7 @@ export default function AddMusicModal({
                 </ul>
               )}
             </div>
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="music-category">카테고리</Label>
               <Input
                 id="music-category"
@@ -253,12 +265,12 @@ export default function AddMusicModal({
                 className="w-full"
               />
               {filteredCategories.length > 0 && (
-                <ul className="mt-2 max-h-40 overflow-auto">
+                <ul className="mt-1 max-h-32 overflow-auto bg-background border rounded-md">
                   {filteredCategories.map((category) => (
                     <li
                       key={category.id}
                       onClick={() => handleCategorySelect(category)}
-                      className="cursor-pointer hover:bg-gray-100 p-2"
+                      className="cursor-pointer hover:bg-muted px-2 py-1 text-sm"
                     >
                       {category.categoryName}
                     </li>
@@ -266,7 +278,7 @@ export default function AddMusicModal({
                 </ul>
               )}
             </div>
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="album-art-url">앨범아트 URL</Label>
               <Input
                 id="album-art-url"
@@ -277,15 +289,20 @@ export default function AddMusicModal({
                 disabled
               />
             </div>
-            <div>
-              <Button 
-                type="button"
-                onClick={() => setIsSearchMusicModalOpen(true)}
-                className="w-full mt-2"
-              >앨범 아트 검색</Button>
-            </div>
-            <div className="flex justify-end mt-4">
-              <Button type="submit">{initialMusic ? '수정' : '추가'}</Button>
+            <Button 
+              type="button"
+              onClick={() => setIsSearchMusicModalOpen(true)}
+              className="w-full"
+            >
+              앨범 아트 검색
+            </Button>
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button type="button" variant="outline" onClick={handleCloseModal}>
+                취소
+              </Button>
+              <Button type="submit">
+                {initialMusic ? '수정' : '추가'}
+              </Button>
             </div>
           </form>
         </DialogContent>

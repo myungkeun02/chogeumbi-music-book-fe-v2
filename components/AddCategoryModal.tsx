@@ -99,16 +99,15 @@ export default function AddCategoryModal({ isOpen, onOpenChange, onCategoryAdded
       onOpenChange(true);
     }
   };
-
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>{initialCategory ? '카테고리 수정' : '카테고리 추가'}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
               <Label htmlFor="category-name">카테고리 이름</Label>
               <Input
                 id="category-name"
@@ -118,23 +117,28 @@ export default function AddCategoryModal({ isOpen, onOpenChange, onCategoryAdded
                 className="w-full"
               />
             </div>
-            <div className="mb-4">
+            <div className="space-y-2">
               <Label htmlFor="category-color">카테고리 색상</Label>
-              <div className="flex items-center">
+              <div className="flex items-center space-x-2">
                 <Input
                   id="category-color"
                   type="color"
                   value={categoryColor}
                   onChange={(e) => setCategoryColor(e.target.value)}
-                  className="w-12 h-12 p-1 mr-2"
+                  className="w-12 h-12 p-1"
                 />
-                <span>{categoryColor}</span>
+                <span className="text-sm">{categoryColor}</span>
               </div>
             </div>
-            <div className="flex justify-end mt-4">
-              <Button type="submit">{initialCategory ? '수정' : '추가'}</Button>
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                취소
+              </Button>
+              <Button type="submit">
+                {initialCategory ? '수정' : '추가'}
+              </Button>
             </div>
-            </form>
+          </form>
         </DialogContent>
       </Dialog>
       <FeedbackModal

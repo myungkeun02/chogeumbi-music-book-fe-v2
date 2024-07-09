@@ -218,109 +218,111 @@ export default function SignupModal({ isOpen, onOpenChange }: SignupModalProps) 
           onOpenChange(open);
         }}
       >
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>회원가입</DialogTitle>
           </DialogHeader>
-          <div>
-            <Label htmlFor="signup-email">이메일</Label>
-            <Input 
-              id="signup-email" 
-              type="email" 
-              className="w-full" 
-              value={email} 
-              onChange={handleEmailChange} 
-              disabled={!isEmailVerificationOpen || isCodeSent}
-            />
-            {emailError && <div className="text-red-500">{emailError}</div>}
-          </div>
-          {isEmailVerificationOpen && isCodeSent && (
-            <div>
-              <Label htmlFor="verification-code">인증 코드</Label>
-              <Input
-                id="verification-code"
-                type="text"
-                value={authCode}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAuthCode(e.target.value)}
-                className="w-full"
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="signup-email">이메일</Label>
+              <Input 
+                id="signup-email" 
+                type="email" 
+                className="w-full" 
+                value={email} 
+                onChange={handleEmailChange} 
+                disabled={!isEmailVerificationOpen || isCodeSent}
               />
-              <div className="text-right text-gray-500">{formatTime(timeLeft)}</div>
+              {emailError && <div className="text-red-500 text-sm">{emailError}</div>}
             </div>
-          )}
-          {isEmailVerificationOpen && (
-            <div className="flex justify-end mt-4">
-              <Button onClick={isCodeSent ? handleVerifyCode : handleSendCode} disabled={isCodeLoading}>
-                {isCodeSent ? "인증 코드 확인" : "인증 코드 발송"}
-              </Button>
-            </div>
-          )}
-          {!isEmailVerificationOpen && (
-            <>
-              <div>
-                <Label htmlFor="signup-nickname">닉네임</Label>
-                <Input 
-                  id="signup-nickname" 
+            {isEmailVerificationOpen && isCodeSent && (
+              <div className="space-y-2">
+                <Label htmlFor="verification-code">인증 코드</Label>
+                <Input
+                  id="verification-code"
                   type="text"
-                  className="w-full" 
-                  value={username} 
-                  onChange={handleUsernameChange} 
+                  value={authCode}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAuthCode(e.target.value)}
+                  className="w-full"
                 />
-                {usernameError && <div className="text-red-500">{usernameError}</div>}
+                <div className="text-right text-gray-500 text-sm">{formatTime(timeLeft)}</div>
               </div>
-              <div>
-                <Label htmlFor="signup-password">비밀번호</Label>
-                <Input 
-                  id="signup-password" 
-                  type="password" 
-                  className="w-full" 
-                  value={password} 
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  onKeyUp={handleKeyUp}
-                  onCompositionStart={handleComposition}
-                  onCompositionEnd={handleComposition}
-                />
-                {capsLockOn && <div className="text-yellow-500">Caps Lock이 켜져 있습니다.</div>}
-                {isHangul && <div className="text-yellow-500">한글 입력 모드입니다.</div>}
+            )}
+            {isEmailVerificationOpen && (
+              <div className="flex justify-end">
+                <Button onClick={isCodeSent ? handleVerifyCode : handleSendCode} disabled={isCodeLoading}>
+                  {isCodeSent ? "인증 코드 확인" : "인증 코드 발송"}
+                </Button>
               </div>
-              <div>
-                <Label htmlFor="signup-confirm-password">비밀번호 확인</Label>
-                <Input 
-                  id="signup-confirm-password" 
-                  type="password" 
-                  className="w-full" 
-                  value={confirmPassword} 
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  onKeyUp={handleKeyUp}
-                  onCompositionStart={handleComposition}
-                  onCompositionEnd={handleComposition}
-                />
-                {capsLockOn && <div className="text-yellow-500">Caps Lock이 켜져 있습니다.</div>}
-                {isHangul && <div className="text-yellow-500">한글 입력 모드입니다.</div>}
-              </div>
-              <div className="flex justify-end mt-4">
-                <Button onClick={handleSignup} disabled={isLoading}>가입</Button>
-              </div>
-            </>
-          )}
+            )}
+            {!isEmailVerificationOpen && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-nickname">닉네임</Label>
+                  <Input 
+                    id="signup-nickname" 
+                    type="text"
+                    className="w-full" 
+                    value={username} 
+                    onChange={handleUsernameChange} 
+                  />
+                  {usernameError && <div className="text-red-500 text-sm">{usernameError}</div>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-password">비밀번호</Label>
+                  <Input 
+                    id="signup-password" 
+                    type="password" 
+                    className="w-full" 
+                    value={password} 
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    onKeyUp={handleKeyUp}
+                    onCompositionStart={handleComposition}
+                    onCompositionEnd={handleComposition}
+                  />
+                  {capsLockOn && <div className="text-yellow-500 text-sm">Caps Lock이 켜져 있습니다.</div>}
+                  {isHangul && <div className="text-yellow-500 text-sm">한글 입력 모드입니다.</div>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-confirm-password">비밀번호 확인</Label>
+                  <Input 
+                    id="signup-confirm-password" 
+                    type="password" 
+                    className="w-full" 
+                    value={confirmPassword} 
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    onKeyUp={handleKeyUp}
+                    onCompositionStart={handleComposition}
+                    onCompositionEnd={handleComposition}
+                  />
+                  {capsLockOn && <div className="text-yellow-500 text-sm">Caps Lock이 켜져 있습니다.</div>}
+                  {isHangul && <div className="text-yellow-500 text-sm">한글 입력 모드입니다.</div>}
+                </div>
+                <div className="flex justify-end">
+                  <Button onClick={handleSignup} disabled={isLoading}>가입</Button>
+                </div>
+              </>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
-
+  
       <Dialog open={isWelcomeOpen} onOpenChange={setIsWelcomeOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>환영합니다!</DialogTitle>
           </DialogHeader>
-          <div>
-            회원가입을 축하합니다! 메인 페이지로 돌아갑니다.
-          </div>
-          <div className="flex justify-end mt-4">
-            <Button onClick={handleWelcomeClose}>확인</Button>
+          <div className="space-y-4">
+            <p>회원가입을 축하합니다! 메인 페이지로 돌아갑니다.</p>
+            <div className="flex justify-end">
+              <Button onClick={handleWelcomeClose}>확인</Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
-
+  
       <FeedbackModal
         isOpen={feedbackModalOpen}
         onOpenChange={setFeedbackModalOpen}
