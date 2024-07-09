@@ -70,39 +70,41 @@ export default function SearchMusicModal({ isOpen, onOpenChange, onImageSelect }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[60vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[425px] max-h-[60vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Search Album Art</DialogTitle>
+          <DialogTitle>앨범 아트 검색</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSearch} className="flex flex-col gap-4">
-          <Input 
-            type="text" 
-            placeholder="검색시 노래제목 아티스트로 입력하면 좀 더 정확한 결과가 나옵니다 ..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Searching..." : "Search"}
-          </Button>
-        </form>
-        {error && <p className="text-red-500 mt-4">{error}</p>}
-        {searchResults.length > 0 && (
-          <div className="grid grid-cols-3 gap-4 mt-4">
-            {searchResults.map((imageUrl, index) => (
-              <div 
-                key={index} 
-                className="relative aspect-square bg-background rounded-lg overflow-hidden cursor-pointer"
-                onClick={() => handleImageSelect(imageUrl)}
-              >
-                <img
-                  src={imageUrl}
-                  alt={`Album Art ${index + 1}`}
-                  className="object-cover w-full h-full"
-                />
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="space-y-4">
+          <form onSubmit={handleSearch} className="space-y-4">
+            <Input 
+              type="text" 
+              placeholder="검색시 노래제목 아티스트로 입력하면 좀 더 정확한 결과가 나옵니다 ..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <Button type="submit" disabled={isLoading} className="w-full">
+              {isLoading ? "검색 중..." : "검색"}
+            </Button>
+          </form>
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {searchResults.length > 0 && (
+            <div className="grid grid-cols-3 gap-4">
+              {searchResults.map((imageUrl, index) => (
+                <div 
+                  key={index} 
+                  className="relative aspect-square bg-background rounded-lg overflow-hidden cursor-pointer"
+                  onClick={() => handleImageSelect(imageUrl)}
+                >
+                  <img
+                    src={imageUrl}
+                    alt={`Album Art ${index + 1}`}
+                    className="object-cover w-full h-full"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
