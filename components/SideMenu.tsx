@@ -103,7 +103,7 @@ const SideMenu = forwardRef<SideMenuRef, SideMenuProps>(({
   const fetchCategories = useCallback(async () => {
     try {
       const response = await axios.get(`https://chogeumbi.kr/api/v1/category/all`, {
-        params: { pageNo: categoryPage, pageSize: 30, sortBy: 'id', sortDir: 'desc' }
+        params: { pageNo: categoryPage, pageSize: 30, sortBy: 'categoryName', sortDir: 'asc' }
       });
       const newCategories = response.data.data.categoryList;
       setCategories(prev => {
@@ -120,7 +120,7 @@ const SideMenu = forwardRef<SideMenuRef, SideMenuProps>(({
   const fetchArtists = useCallback(async () => {
     try {
       const response = await axios.get(`https://chogeumbi.kr/api/v1/author/all`, {
-        params: { pageNo: artistPage, pageSize: 30, sortBy: 'id', sortDir: 'desc' }
+        params: { pageNo: artistPage, pageSize: 30, sortBy: 'authorName', sortDir: 'asc' }
       });
       const newArtists = response.data.data.authorList;
       setArtists(prev => {
@@ -137,7 +137,7 @@ const SideMenu = forwardRef<SideMenuRef, SideMenuProps>(({
   const refreshCategories = useCallback(async () => {
     try {
       const response = await axios.get(`https://chogeumbi.kr/api/v1/category/all`, {
-        params: { pageNo: 1, pageSize: 30, sortBy: 'id', sortDir: 'desc' }
+        params: { pageNo: 1, pageSize: 30, sortBy: 'categoryName', sortDir: 'asc' }
       });
       const newCategories = response.data.data.categoryList;
       setCategories(newCategories);
@@ -151,7 +151,7 @@ const SideMenu = forwardRef<SideMenuRef, SideMenuProps>(({
   const refreshArtists = useCallback(async () => {
     try {
       const response = await axios.get(`https://chogeumbi.kr/api/v1/author/all`, {
-        params: { pageNo: 1, pageSize: 30, sortBy: 'id', sortDir: 'desc' }
+        params: { pageNo: 1, pageSize: 30, sortBy: 'authorName', sortDir: 'asc' }
       });
       const newArtists = response.data.data.authorList;
       setArtists(newArtists);
