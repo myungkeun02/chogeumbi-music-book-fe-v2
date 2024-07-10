@@ -69,8 +69,8 @@ export default function MainComponent() {
         params: {
           pageNo: pageNum,
           pageSize: 20,
-          sortBy: 'id',
-          sortDir: 'desc',
+          sortBy: 'author.authorName',
+          sortDir: 'asc',
           searchKeyword: search
         }
       });
