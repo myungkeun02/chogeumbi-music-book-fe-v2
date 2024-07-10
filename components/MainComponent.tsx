@@ -52,6 +52,7 @@ export default function MainComponent() {
   const [deleteMusicName, setDeleteMusicName] = useState<string>('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedArtists, setSelectedArtists] = useState<string[]>([]);
+  const [totalMusicCount, setTotalMusicCount] = useState<number | null>(null);
 
   const sideMenuRef = useRef<{ refreshData: () => void } | null>(null);
 
@@ -92,6 +93,7 @@ export default function MainComponent() {
         setMusicData(prev => pageNum === 1 ? filteredMusicList : [...prev, ...filteredMusicList]);
         setFilteredMusicData(prev => pageNum === 1 ? filteredMusicList : [...prev, ...filteredMusicList]);
         setHasMore(!response.data.data.last);
+        setTotalMusicCount(response.data.data.totalElements);
       } else {
         console.error("Unexpected response structure:", response.data);
       }
@@ -290,6 +292,13 @@ export default function MainComponent() {
         onEdit={handleEditMusic}
         onDelete={handleDeleteMusic}
       />
+      
+      {totalMusicCount !== null && (
+        <div className="text-center py-4 text-gray-600 dark:text-gray-400">
+          총 {totalMusicCount}개의 음악이 로드되었습니다.
+        </div>
+      )}
+      
       <SideMenu
         ref={sideMenuRef}
         isMenuOpen={isMenuOpen}
