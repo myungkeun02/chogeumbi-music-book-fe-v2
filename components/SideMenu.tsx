@@ -436,15 +436,6 @@ return (
           ))}
         </div>
       </div>
-
-      <div className="flex items-center justify-between w-full mb-8">
-        <Label htmlFor="dark-mode" className="text-lg font-semibold">Dark Mode</Label>
-        <Switch
-          id="dark-mode"
-          checked={isDarkMode}
-          onCheckedChange={(checked) => setIsDarkMode(checked)}
-        />
-      </div>
       {user && user.role === 'ADMIN' && (
         <div className="flex flex-col gap-4 w-full">
           <Button variant="outline" onClick={() => setIsAddMusicModalOpen(true)} className="w-full">음악 추가</Button>
