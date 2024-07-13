@@ -26,18 +26,14 @@ export default function AddCategoryModal({ isOpen, onOpenChange, onCategoryAdded
   const [feedbackMessage, setFeedbackMessage] = useState("");
 
   useEffect(() => {
-    if (initialCategory) {
+    if (isOpen && initialCategory) {
       setCategoryName(initialCategory.categoryName);
       setCategoryColor("#" + initialCategory.categoryColor);
     } else {
-      resetForm();
+      setCategoryName("");
+      setCategoryColor("#000000");
     }
-  }, [initialCategory, isOpen]);
-
-  const resetForm = () => {
-    setCategoryName("");
-    setCategoryColor("#000000");
-  };
+  }, [isOpen, initialCategory]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -48,37 +44,20 @@ export default function AddCategoryModal({ isOpen, onOpenChange, onCategoryAdded
       if (initialCategory) {
         response = await axios.put(
           `https://chogeumbi.kr/api/v1/category/${initialCategory.id}`,
-          {
-            categoryName: categoryName,
-            categoryColor: categoryColor.slice(1)
-          },
-          {
-            headers: {
-              'Authorization': `Bearer ${accessToken}`,
-              'Content-Type': 'application/json'
-            }
-          }
+          { categoryName, categoryColor: categoryColor.slice(1) },
+          { headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' } }
         );
       } else {
         response = await axios.post(
           "https://chogeumbi.kr/api/v1/category", 
-          {
-            categoryName: categoryName,
-            categoryColor: categoryColor.slice(1)
-          },
-          {
-            headers: {
-              'Authorization': `Bearer ${accessToken}`,
-              'Content-Type': 'application/json'
-            }
-          }
+          { categoryName, categoryColor: categoryColor.slice(1) },
+          { headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' } }
         );
       }
 
       if (response.data.statusCode === 200 || response.data.statusCode === 201) {
         setFeedbackTitle("성공");
         setFeedbackMessage(`카테고리 "${response.data.data.categoryName}"가 성공적으로 ${initialCategory ? '수정' : '추가'}되었습니다.`);
-        resetForm();
         onCategoryAdded(response.data.data);
       } else {
         throw new Error(response.data.message || "Unexpected response status");
@@ -93,12 +72,6 @@ export default function AddCategoryModal({ isOpen, onOpenChange, onCategoryAdded
     onOpenChange(false);
   };
 
-  const handleFeedbackModalClose = (isOpen: boolean) => {
-    setIsFeedbackModalOpen(isOpen);
-    if (!isOpen) {
-      onOpenChange(true);
-    }
-  };
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -111,7 +84,6 @@ export default function AddCategoryModal({ isOpen, onOpenChange, onCategoryAdded
               <Label htmlFor="category-name">카테고리 이름</Label>
               <Input
                 id="category-name"
-                type="text"
                 value={categoryName}
                 onChange={(e) => setCategoryName(e.target.value)}
                 className="w-full"
@@ -143,7 +115,7 @@ export default function AddCategoryModal({ isOpen, onOpenChange, onCategoryAdded
       </Dialog>
       <FeedbackModal
         isOpen={isFeedbackModalOpen}
-        onOpenChange={handleFeedbackModalClose}
+        onOpenChange={setIsFeedbackModalOpen}
         title={feedbackTitle}
         message={feedbackMessage}
       />

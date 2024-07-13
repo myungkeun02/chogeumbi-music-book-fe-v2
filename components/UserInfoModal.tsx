@@ -1,3 +1,4 @@
+// UserInfoModal.tsx
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -9,7 +10,6 @@ interface User {
   username: string;
   email: string;
   role: 'USER' | 'ADMIN';
-//   level: number;
 }
 
 interface UserInfoModalProps {
@@ -37,19 +37,11 @@ export default function UserInfoModal({ isOpen, onOpenChange, user }: UserInfoMo
                 <span className="font-semibold">{user.username}</span>
               </div>
               <div className="flex items-center space-x-2">
-                <span className="text-gray-500 font-medium w-20">이메일:</span>
-                <span className="font-semibold">{user.email}</span>
-              </div>
-              <div className="flex items-center space-x-2">
                 <span className="text-gray-500 font-medium w-20">권한:</span>
                 <span className="font-semibold">
                   {user.role === 'ADMIN' ? '관리자' : '일반 사용자'}
                 </span>
               </div>
-              {/* <div className="flex items-center space-x-2">
-                <span className="text-gray-500 font-medium w-20">레벨:</span>
-                <span className="font-semibold">{user.level}</span>
-              </div> */}
             </div>
             <div className="pt-4 border-t border-gray-200">
               <Button 
@@ -70,3 +62,4 @@ export default function UserInfoModal({ isOpen, onOpenChange, user }: UserInfoMo
     </>
   );
 }
+              

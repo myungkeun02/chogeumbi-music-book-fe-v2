@@ -7,6 +7,7 @@ import SideMenu from "./SideMenu";
 import LoginModal from "./LoginModal";
 import SignupModal from "./SignupModal";
 import AddMusicModal from "./AddMusicModal";
+import EditMusicModal from "./EditMusicModal";
 import SearchMusicModal from "./SearchMusicModal";
 import AddArtistModal from "./AddArtistModal";
 import AddCategoryModal from "./AddCategoryModal";
@@ -31,10 +32,12 @@ export default function MainComponent() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
   const [isAddMusicModalOpen, setIsAddMusicModalOpen] = useState(false);
+  const [isEditMusicModalOpen, setIsEditMusicModalOpen] = useState(false);
   const [isAddArtistModalOpen, setIsAddArtistModalOpen] = useState(false);
   const [isAddCategoryModalOpen, setIsAddCategoryModalOpen] = useState(false);
   const [isSearchMusicModalOpen, setIsSearchMusicModalOpen] = useState(false);
   const [musicData, setMusicData] = useState<MusicData[]>([]);
+  const [allMusicData, setAllMusicData] = useState<MusicData[]>([]);
   const [filteredMusicData, setFilteredMusicData] = useState<MusicData[]>([]);
   const [selectedAlbumArtUrl, setSelectedAlbumArtUrl] = useState("");
   const [notificationState, setNotificationState] = useState({
@@ -69,7 +72,7 @@ export default function MainComponent() {
       const response = await axios.get("https://www.chogeumbi.kr/api/v1/music/all", {
         params: {
           pageNo: pageNum,
-          pageSize: 20,
+          pageSize: 200,
           sortBy: 'author.authorName',
           sortDir: 'asc',
           searchKeyword: search
@@ -77,21 +80,20 @@ export default function MainComponent() {
       });
       if (response.data && response.data.data && response.data.data.musicList) {
         const musicListWithColor = response.data.data.musicList.map((music: any) => ({
-            id: music.id,
-            albumCover: music.albumCover,
-            musicName: music.musicName,
-            author: { authorName: music.author.authorName },
-            category: { 
-              categoryName: music.category.categoryName, 
-              categoryColor: music.category.categoryColor || generateRandomColor() 
-            }
-          }));
-        const filteredMusicList = musicListWithColor.filter((music: MusicData) => 
-          (selectedCategories.length === 0 || selectedCategories.includes(music.category.categoryName)) &&
-          (selectedArtists.length === 0 || selectedArtists.includes(music.author.authorName))
-        );
-        setMusicData(prev => pageNum === 1 ? filteredMusicList : [...prev, ...filteredMusicList]);
-        setFilteredMusicData(prev => pageNum === 1 ? filteredMusicList : [...prev, ...filteredMusicList]);
+          id: music.id,
+          albumCover: music.albumCover,
+          musicName: music.musicName,
+          author: { authorName: music.author.authorName },
+          category: { 
+            categoryName: music.category.categoryName, 
+            categoryColor: music.category.categoryColor || generateRandomColor() 
+          }
+        }));
+        
+        // 전체 음악 데이터 저장 (필터링되지 않은 상태)
+        setAllMusicData(prev => pageNum === 1 ? musicListWithColor : [...prev, ...musicListWithColor]);
+        
+        // 더 로드할 데이터가 있는지 확인
         setHasMore(!response.data.data.last);
         setTotalMusicCount(response.data.data.totalElements);
       } else {
@@ -102,7 +104,7 @@ export default function MainComponent() {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedCategories, selectedArtists]);
+  }, []);
 
   const generateRandomColor = () => {
     return Math.floor(Math.random()*16777215).toString(16);
@@ -110,10 +112,9 @@ export default function MainComponent() {
 
   useEffect(() => {
     setPage(1);
-    setMusicData([]);
-    setFilteredMusicData([]);
+    setAllMusicData([]);
     fetchMusicData(1, searchTerm);
-  }, [fetchMusicData, searchTerm, selectedCategories, selectedArtists]);
+  }, [fetchMusicData, searchTerm]);
 
   useEffect(() => {
     if (page > 1) {
@@ -122,12 +123,15 @@ export default function MainComponent() {
   }, [fetchMusicData, page, searchTerm]);
 
   useEffect(() => {
-    const filtered = musicData.filter(music => 
-      music.musicName.toLowerCase().includes(localSearchTerm.toLowerCase()) ||
-      music.author.authorName.toLowerCase().includes(localSearchTerm.toLowerCase())
+    const filtered = allMusicData.filter((music: MusicData) => 
+      (selectedCategories.length === 0 || selectedCategories.includes(music.category.categoryName)) &&
+      (selectedArtists.length === 0 || selectedArtists.includes(music.author.authorName)) &&
+      (music.musicName.toLowerCase().includes(localSearchTerm.toLowerCase()) ||
+       music.author.authorName.toLowerCase().includes(localSearchTerm.toLowerCase()))
     );
+    setMusicData(filtered);
     setFilteredMusicData(filtered);
-  }, [musicData, localSearchTerm]);
+  }, [allMusicData, selectedCategories, selectedArtists, localSearchTerm]);
 
   useEffect(() => {
     if (user) {
@@ -145,7 +149,11 @@ export default function MainComponent() {
   const handleAlbumArtSelect = (imageUrl: string) => {
     setSelectedAlbumArtUrl(imageUrl);
     setIsSearchMusicModalOpen(false);
-    setIsAddMusicModalOpen(true);
+    if (isAddMusicModalOpen) {
+      setIsAddMusicModalOpen(true);
+    } else if (isEditMusicModalOpen) {
+      setIsEditMusicModalOpen(true);
+    }
   };
 
   const handleCopy = useCallback((musicName: string, authorName: string) => {
@@ -168,8 +176,7 @@ export default function MainComponent() {
   const handleSearch = useCallback((searchTerm: string) => {
     setSearchTerm(searchTerm);
     setLocalSearchTerm(searchTerm);
-    setMusicData([]);
-    setFilteredMusicData([]);
+    setAllMusicData([]);
     setPage(1);
     setHasMore(true);
   }, []);
@@ -187,7 +194,7 @@ export default function MainComponent() {
   const handleEditMusic = useCallback((music: MusicData) => {
     setSelectedMusic(music);
     setSelectedAlbumArtUrl(music.albumCover);
-    setIsAddMusicModalOpen(true);
+    setIsEditMusicModalOpen(true);
   }, []);
 
   const handleDeleteMusic = useCallback((musicId: string, musicName: string) => {
@@ -207,8 +214,7 @@ export default function MainComponent() {
         headers: { 'Authorization': `Bearer ${accessToken}` }
       });
 
-      setMusicData(prev => prev.filter(music => music.id !== deleteMusicId));
-      setFilteredMusicData(prev => prev.filter(music => music.id !== deleteMusicId));
+      setAllMusicData(prev => prev.filter(music => music.id !== deleteMusicId));
       setIsDeleteModalOpen(false);
     } catch (error) {
       console.error("Failed to delete music:", error);
@@ -226,9 +232,7 @@ export default function MainComponent() {
         categoryColor: music.category.categoryColor || generateRandomColor() 
       }
     };
-    setMusicData(prev => [newMusic, ...prev]);
-    setFilteredMusicData(prev => [newMusic, ...prev]);
-    setSelectedMusic(null);
+    setAllMusicData(prev => [newMusic, ...prev]);
     setIsAddMusicModalOpen(false);
     if (newCategory || newArtist) {
       refreshSideMenu();
@@ -246,10 +250,9 @@ export default function MainComponent() {
         categoryColor: music.category.categoryColor || generateRandomColor() 
       }
     };
-    setMusicData(prev => prev.map(item => item.id === updatedMusic.id ? updatedMusic : item));
-    setFilteredMusicData(prev => prev.map(item => item.id === updatedMusic.id ? updatedMusic : item));
+    setAllMusicData(prev => prev.map(item => item.id === updatedMusic.id ? updatedMusic : item));
     setSelectedMusic(null);
-    setIsAddMusicModalOpen(false);
+    setIsEditMusicModalOpen(false);
     if (newCategory || newArtist) {
       refreshSideMenu();
     }
@@ -293,9 +296,9 @@ export default function MainComponent() {
         onDelete={handleDeleteMusic}
       />
       
-      {totalMusicCount !== null && (
+      {filteredMusicData.length !== null && (
         <div className="text-center py-4 text-gray-600 dark:text-gray-400">
-          총 {totalMusicCount}개의 음악이 로드되었습니다.
+          총 {filteredMusicData.length}개의 음악이 로드되었습니다.
         </div>
       )}
       
@@ -320,7 +323,10 @@ export default function MainComponent() {
         onOpenChange={handleLoginModalClose} 
         setIsMenuOpen={setIsMenuOpen}
       />
-      <SignupModal isOpen={isSignupModalOpen} onOpenChange={setIsSignupModalOpen} />
+      <SignupModal 
+        isOpen={isSignupModalOpen} 
+        onOpenChange={setIsSignupModalOpen} 
+      />
       {user && user.role === 'ADMIN' && (
         <>
           <AddMusicModal
@@ -330,6 +336,13 @@ export default function MainComponent() {
             setSelectedAlbumArtUrl={setSelectedAlbumArtUrl}
             setIsSearchMusicModalOpen={setIsSearchMusicModalOpen}
             onMusicAdded={handleMusicAdded}
+          />
+          <EditMusicModal
+            isOpen={isEditMusicModalOpen}
+            onOpenChange={setIsEditMusicModalOpen}
+            selectedAlbumArtUrl={selectedAlbumArtUrl}
+            setSelectedAlbumArtUrl={setSelectedAlbumArtUrl}
+            setIsSearchMusicModalOpen={setIsSearchMusicModalOpen}
             onMusicUpdated={handleMusicUpdated}
             initialMusic={selectedMusic}
           />
@@ -339,11 +352,13 @@ export default function MainComponent() {
             onImageSelect={handleAlbumArtSelect}
           />
           <AddArtistModal 
+            key={isAddArtistModalOpen ? 'open' : 'closed'}
             isOpen={isAddArtistModalOpen} 
             onOpenChange={setIsAddArtistModalOpen}
             onArtistAdded={refreshSideMenu}
           />
           <AddCategoryModal 
+            key={isAddCategoryModalOpen ? 'open' : 'closed'}
             isOpen={isAddCategoryModalOpen} 
             onOpenChange={setIsAddCategoryModalOpen}
             onCategoryAdded={refreshSideMenu}
