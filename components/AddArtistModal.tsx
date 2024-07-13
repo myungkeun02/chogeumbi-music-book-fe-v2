@@ -26,18 +26,14 @@ export default function AddArtistModal({ isOpen, onOpenChange, onArtistAdded, in
   const [feedbackMessage, setFeedbackMessage] = useState("");
 
   useEffect(() => {
-    if (initialArtist) {
+    if (isOpen && initialArtist) {
       setArtistName(initialArtist.authorName);
       setArtistSubName(initialArtist.subName);
     } else {
-      resetForm();
+      setArtistName("");
+      setArtistSubName("");
     }
-  }, [initialArtist, isOpen]);
-
-  const resetForm = () => {
-    setArtistName("");
-    setArtistSubName("");
-  };
+  }, [isOpen, initialArtist]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -48,37 +44,20 @@ export default function AddArtistModal({ isOpen, onOpenChange, onArtistAdded, in
       if (initialArtist) {
         response = await axios.put(
           `https://chogeumbi.kr/api/v1/author/${initialArtist.id}`,
-          {
-            authorName: artistName,
-            subName: artistSubName
-          },
-          {
-            headers: {
-              'Authorization': `Bearer ${accessToken}`,
-              'Content-Type': 'application/json'
-            }
-          }
+          { authorName: artistName, subName: artistSubName },
+          { headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' } }
         );
       } else {
         response = await axios.post(
           'https://chogeumbi.kr/api/v1/author',
-          {
-            authorName: artistName,
-            subName: artistSubName
-          },
-          {
-            headers: {
-              'Authorization': `Bearer ${accessToken}`,
-              'Content-Type': 'application/json'
-            }
-          }
+          { authorName: artistName, subName: artistSubName },
+          { headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' } }
         );
       }
       
       if (response.data.statusCode === 200 || response.data.statusCode === 201) {
         setFeedbackTitle("성공");
         setFeedbackMessage(`아티스트 "${response.data.data.authorName}"이(가) 성공적으로 ${initialArtist ? '수정' : '추가'}되었습니다.`);
-        resetForm();
         onArtistAdded(response.data.data);
       } else {
         throw new Error(response.data.message || "Unexpected response status");
@@ -93,13 +72,6 @@ export default function AddArtistModal({ isOpen, onOpenChange, onArtistAdded, in
     onOpenChange(false);
   };
 
-  const handleFeedbackModalClose = (isOpen: boolean) => {
-    setIsFeedbackModalOpen(isOpen);
-    if (!isOpen) {
-      onOpenChange(true);
-    }
-  };
-
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -112,7 +84,6 @@ export default function AddArtistModal({ isOpen, onOpenChange, onArtistAdded, in
               <Label htmlFor="artist-name">아티스트 이름</Label>
               <Input
                 id="artist-name"
-                type="text"
                 value={artistName}
                 onChange={(e) => setArtistName(e.target.value)}
                 className="w-full"
@@ -122,7 +93,6 @@ export default function AddArtistModal({ isOpen, onOpenChange, onArtistAdded, in
               <Label htmlFor="artist-subname">아티스트 별명</Label>
               <Input
                 id="artist-subname"
-                type="text"
                 value={artistSubName}
                 onChange={(e) => setArtistSubName(e.target.value)}
                 className="w-full"
@@ -141,7 +111,7 @@ export default function AddArtistModal({ isOpen, onOpenChange, onArtistAdded, in
       </Dialog>
       <FeedbackModal 
         isOpen={isFeedbackModalOpen} 
-        onOpenChange={handleFeedbackModalClose}
+        onOpenChange={setIsFeedbackModalOpen}
         title={feedbackTitle}
         message={feedbackMessage}
       />

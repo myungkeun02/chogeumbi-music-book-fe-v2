@@ -71,10 +71,9 @@ export default function ChangeNicknameModal({ isOpen, onOpenChange, currentNickn
             <Label htmlFor="nickname">새 닉네임</Label>
             <Input 
               id="nickname" 
-              type="text" 
-              className="w-full" 
               value={newNickname}
               onChange={(e) => setNewNickname(e.target.value)}
+              className="w-full" 
               disabled={isLoading}
             />
           </div>

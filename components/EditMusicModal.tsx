@@ -7,13 +7,14 @@ import axios from "axios";
 import Cookies from 'js-cookie';
 import { FeedbackModal } from "./FeedbackModal";
 
-interface AddMusicModalProps {
+interface EditMusicModalProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onMusicAdded: (music: MusicData, newCategory: boolean, newArtist: boolean) => void;
+  onMusicUpdated: (music: MusicData, newCategory: boolean, newArtist: boolean) => void;
   selectedAlbumArtUrl: string;
   setSelectedAlbumArtUrl: (url: string) => void;
   setIsSearchMusicModalOpen: (isOpen: boolean) => void;
+  initialMusic: MusicData | null;
 }
 
 interface Category {
@@ -34,14 +35,15 @@ interface MusicData {
   category: { categoryName: string; categoryColor: string };
 }
 
-export default function AddMusicModal({ 
+export default function EditMusicModal({ 
   isOpen, 
   onOpenChange, 
   selectedAlbumArtUrl, 
   setSelectedAlbumArtUrl,
   setIsSearchMusicModalOpen,
-  onMusicAdded,
-}: AddMusicModalProps) {
+  onMusicUpdated,
+  initialMusic,
+}: EditMusicModalProps) {
   const [musicName, setMusicName] = useState("");
   const [artistName, setArtistName] = useState("");
   const [categoryName, setCategoryName] = useState("");
@@ -53,22 +55,16 @@ export default function AddMusicModal({
   const [feedbackTitle, setFeedbackTitle] = useState("");
   const [feedbackMessage, setFeedbackMessage] = useState("");
 
-  const resetForm = useCallback(() => {
-    setMusicName("");
-    setArtistName("");
-    setCategoryName("");
-    setSelectedAlbumArtUrl("");
-    setFilteredCategories([]);
-    setFilteredArtists([]);
-  }, [setSelectedAlbumArtUrl]);
-
   useEffect(() => {
-    if (isOpen) {
-      resetForm();
+    if (isOpen && initialMusic) {
+      setMusicName(initialMusic.musicName);
+      setArtistName(initialMusic.author.authorName);
+      setCategoryName(initialMusic.category.categoryName);
+      setSelectedAlbumArtUrl(initialMusic.albumCover);
       fetchCategories();
       fetchArtists();
     }
-  }, [isOpen, resetForm]);
+  }, [isOpen, initialMusic, setSelectedAlbumArtUrl]);
 
   const fetchCategories = useCallback(async () => {
     const accessToken = Cookies.get('accessToken');
@@ -94,10 +90,10 @@ export default function AddMusicModal({
     }
   }, []);
 
-  const handleAddMusic = async (e: FormEvent) => {
+  const handleEditMusic = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (!musicName || !artistName || !categoryName || !selectedAlbumArtUrl) {
+    if (!musicName || !artistName || !categoryName || !selectedAlbumArtUrl || !initialMusic) {
       setFeedbackTitle("실패");
       setFeedbackMessage("모든 필드를 채워주세요.");
       setIsFeedbackModalOpen(true);
@@ -113,12 +109,12 @@ export default function AddMusicModal({
     };
 
     try {
-      const response = await axios.post('https://chogeumbi.kr/api/v1/music', musicData, {
+      const response = await axios.put(`https://chogeumbi.kr/api/v1/music/${initialMusic.id}`, musicData, {
         headers: { 'Authorization': `Bearer ${accessToken}` }
       });
 
-      if (response.data.statusCode === 201) {
-        let feedbackMessage = `음악 "${response.data.data.music.musicName}"이(가) 성공적으로 추가되었습니다.`;
+      if (response.data.statusCode === 200) {
+        let feedbackMessage = `음악 "${response.data.data.music.musicName}"이(가) 성공적으로 수정되었습니다.`;
         let newCategory = response.data.data.generatedCategory;
         let newArtist = response.data.data.generatedAuthor;
         
@@ -132,7 +128,7 @@ export default function AddMusicModal({
         setFeedbackTitle("성공");
         setFeedbackMessage(feedbackMessage);
         
-        const musicData: MusicData = {
+        const updatedMusicData: MusicData = {
           id: response.data.data.music.id,
           albumCover: response.data.data.music.albumCover,
           musicName: response.data.data.music.musicName,
@@ -143,16 +139,16 @@ export default function AddMusicModal({
           }
         };
 
-        onMusicAdded(musicData, newCategory, newArtist);
+        onMusicUpdated(updatedMusicData, newCategory, newArtist);
         onOpenChange(false);
         setIsFeedbackModalOpen(true);
       } else {
         throw new Error(response.data.message || "Unexpected response status");
       }
     } catch (error) {
-      console.error("Failed to add music:", error);
+      console.error("Failed to edit music:", error);
       setFeedbackTitle("실패");
-      setFeedbackMessage("음악 추가에 실패했습니다. 다시 시도해주세요. (중복된 음악)");
+      setFeedbackMessage("음악 수정에 실패했습니다. 다시 시도해주세요.");
       setIsFeedbackModalOpen(true);
     }
   };
@@ -190,9 +186,9 @@ export default function AddMusicModal({
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>음악 추가</DialogTitle>
+            <DialogTitle>음악 수정</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleAddMusic} className="space-y-4">
+          <form onSubmit={handleEditMusic} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="music-name">음악 이름</Label>
               <Input
@@ -268,7 +264,7 @@ export default function AddMusicModal({
                 취소
               </Button>
               <Button type="submit">
-                추가
+                수정
               </Button>
             </div>
           </form>

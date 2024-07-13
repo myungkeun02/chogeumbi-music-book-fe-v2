@@ -332,3 +332,4 @@ export default function SignupModal({ isOpen, onOpenChange }: SignupModalProps) 
     </>
   );
 }
+

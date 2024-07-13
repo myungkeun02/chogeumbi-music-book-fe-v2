@@ -51,6 +51,7 @@ export default function Header({ setIsMenuOpen, onSearch, onLocalSearch }: Heade
   );
 }
 
+
 function SearchIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
