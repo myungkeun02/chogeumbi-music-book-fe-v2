@@ -48,7 +48,18 @@ export default function MusicGrid({
     const g = parseInt(color.substring(2, 4), 16);
     const b = parseInt(color.substring(4, 6), 16);
     const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-    return (yiq >= 128) ? 'black' : 'white';
+    return (yiq >= 128) ? '#000000' : '#FFFFFF';
+  }, []);
+
+  const getDarkerColor = useCallback((hexColor: string): string => {
+    const color = hexColor.charAt(0) === '#' ? hexColor.substring(1, 7) : hexColor;
+    const r = parseInt(color.substring(0, 2), 16);
+    const g = parseInt(color.substring(2, 4), 16);
+    const b = parseInt(color.substring(4, 6), 16);
+    const darkerR = Math.max(0, r - 50);
+    const darkerG = Math.max(0, g - 50);
+    const darkerB = Math.max(0, b - 50);
+    return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
   }, []);
 
   const handleClick = useCallback((music: MusicData) => {
@@ -93,7 +104,7 @@ export default function MusicGrid({
               className="mt-2 inline-block px-2 py-1 text-xs rounded-full"
               style={{
                 backgroundColor: `#${music.category.categoryColor}`,
-                color: getContrastColor(music.category.categoryColor)
+                color: getContrastColor(getDarkerColor(music.category.categoryColor))
               }}
             >
               {music.category.categoryName}
